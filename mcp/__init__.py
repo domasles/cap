@@ -1,4 +1,4 @@
-"""Core package - Codebase-Awareness Protocol"""
+"""MCP Server package - Codebase-Awareness Protocol."""
 
 from .src.meta import __version__
 

@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from src.domain.models import DependenciesYAML, ArchitectureYAML, ApiYAML
+from ...domain.models import DependenciesYAML, ArchitectureYAML, ApiYAML
 
 
 class MCPFormatter:

@@ -5,8 +5,8 @@ from typing import Optional
 
 from pydantic import ValidationError
 
-from src.domain.models import DependenciesYAML, ArchitectureYAML, ApiYAML
-from src.infrastructure import FileReader, FileReaderError
+from ...domain.models import DependenciesYAML, ArchitectureYAML, ApiYAML
+from ...infrastructure import FileReader, FileReaderError
 from .mcp_formatter import MCPFormatter
 
 
