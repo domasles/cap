@@ -1,0 +1,58 @@
+dependencies:
+  python:
+    runtime:
+      requests:
+        version: ">=2.28.0"
+        reason: "HTTP client for API calls"
+      psycopg2:
+        version: ">=2.9.0"
+        reason: "PostgreSQL database driver"
+      fastapi:
+        version: ">=0.100.0"
+        reason: "Web framework for REST API"
+      pydantic:
+        version: ">=2.0.0"
+        reason: "Data validation and settings"
+
+    dev:
+      pytest:
+        version: ">=7.4.0"
+        reason: "Unit testing framework"
+      black:
+        version: ">=23.0.0"
+        reason: "Code formatter"
+      mypy:
+        version: ">=1.5.0"
+        reason: "Static type checker"
+
+  node:
+    runtime:
+      express:
+        version: ">=4.18.0"
+        reason: "HTTP server framework"
+      pg:
+        version: ">=8.11.0"
+        reason: "PostgreSQL client"
+
+    dev:
+      typescript:
+        version: ">=5.0.0"
+        reason: "TypeScript compiler"
+      jest:
+        version: ">=29.0.0"
+        reason: "Testing framework"
+
+rules:
+  forbid:
+    - layer: domain
+      dependency: psycopg2
+      reason: "Database access must be infrastructure-only"
+
+    - layer: domain
+      dependency: fastapi
+      reason: "HTTP concerns must not leak into domain layer"
+
+notes:
+  - "Do not introduce new dependencies without updating this file"
+  - "All runtime dependencies must have a clear reason"
+  - "Keep dev dependencies separate from runtime"
