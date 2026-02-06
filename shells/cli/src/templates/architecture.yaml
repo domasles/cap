@@ -1,0 +1,49 @@
+# Example architecture.yaml for CAP
+#
+# This file defines the architecture patterns and structure of your codebase.
+# AI agents use this to understand code organization and respect architectural boundaries.
+
+architecture:
+  style: "layered"  # Options: layered, hexagonal, microservices, monolithic, etc.
+
+# Define architectural layers (for layered architecture)
+layers:
+  presentation:
+    owns: "src/presentation/**"
+    may_import:
+      - "application"
+      - "domain"
+  
+  application:
+    owns: "src/application/**"
+    may_import:
+      - "domain"
+      - "infrastructure"
+  
+  domain:
+    owns: "src/domain/**"
+    may_import: []  # Domain should be dependency-free
+  
+  infrastructure:
+    owns: "src/infrastructure/**"
+    may_import:
+      - "domain"
+
+# Optional: Define modules and their purposes
+# modules:
+#   user_management:
+#     owns: "src/modules/users/**"
+#     purpose: "Handle user authentication and authorization"
+#     owner: "auth-team"
+#     forbidden_imports:
+#       - "src/modules/billing/**"
+
+# Optional: Define architectural rules
+# rules:
+#   forbid:
+#     - path: "src/domain/**"
+#       calls: "requests.get"
+#       reason: "Domain layer should not make external HTTP calls"
+#     - path: "src/application/**"
+#       calls: "print"
+#       reason: "Use logging instead of print statements"

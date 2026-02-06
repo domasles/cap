@@ -1,0 +1,48 @@
+# Example api.yaml for CAP
+#
+# This file defines the public and internal APIs exported by your codebase.
+# AI agents use this to understand what functionality is available and how to use it.
+
+api:
+  # Public API - stable interface for external consumers
+  public:
+    core_functions:
+      location: "src/api.py"
+      exports:
+        - "initialize"
+        - "process_data"
+        - "get_results"
+      stability: "stable"
+    
+    # Add more public API exports here
+    # module_name:
+    #   location: "src/module/public.py"
+    #   exports:
+    #     - "function_name"
+    #   stability: "stable"  # stable, experimental, deprecated
+  
+  # Internal API - for use within the project only
+  internal:
+    utilities:
+      location: "src/utils/**"
+      exports:
+        - "helper_function"
+        - "internal_validator"
+      warning: "Internal use only - may change without notice"
+    
+    # Add more internal API exports here
+
+# Optional: Define API access rules
+# rules:
+#   forbid:
+#     - path: "tests/**"
+#       api: "internal.database"
+#       reason: "Tests should use public API only"
+#       except:
+#         integration_tests: "tests/integration/**"
+
+# Optional: Additional notes for API consumers
+# notes:
+#   - "All public APIs follow semantic versioning"
+#   - "Deprecated APIs will be maintained for 6 months before removal"
+#   - "See CHANGELOG.md for API changes between versions"

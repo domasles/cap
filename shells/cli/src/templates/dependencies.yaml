@@ -1,0 +1,44 @@
+# Example dependencies.yaml for CAP
+#
+# This file defines the dependencies used in your codebase.
+# AI agents use this to understand what packages are available and their purposes.
+
+dependencies:
+  python:
+    runtime:
+      pydantic:
+        version: "^2.0.0"
+        reason: "Data validation and settings management using Python type annotations"
+      
+      # Add more runtime dependencies here
+      # package_name:
+      #   version: "version_constraint"
+      #   reason: "Why this package is used"
+    
+    dev:
+      pytest:
+        version: "^7.0.0"
+        reason: "Testing framework for Python code"
+      
+      black:
+        version: "^23.0.0"
+        reason: "Code formatter to maintain consistent style"
+      
+      # Add more dev dependencies here
+
+  # Add other languages as needed:
+  # javascript:
+  #   runtime: {}
+  #   dev: {}
+
+# Optional: Define forbidden dependency patterns
+# rules:
+#   forbid:
+#     - layer: "domain"
+#       dependency: "requests"
+#       reason: "Domain layer should not make HTTP calls directly"
+
+# Optional: Additional notes for AI agents
+# notes:
+#   - "All dependencies should be pinned to specific versions in production"
+#   - "Prefer standard library when possible to reduce dependency count"
