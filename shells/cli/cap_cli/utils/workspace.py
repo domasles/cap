@@ -43,4 +43,3 @@ def validate_workspace(workspace: Path) -> tuple[bool, str]:
         return False, f"No .cap/ directory found in {workspace}"
 
     return True, ""
-

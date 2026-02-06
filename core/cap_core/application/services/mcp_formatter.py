@@ -51,15 +51,10 @@ class MCPFormatter:
         result = {"architecture": model.architecture.model_dump()}
 
         if model.layers:
-            result["layers"] = {
-                name: layer.model_dump() for name, layer in model.layers.items()
-            }
+            result["layers"] = {name: layer.model_dump() for name, layer in model.layers.items()}
 
         if model.modules:
-            result["modules"] = {
-                name: module.model_dump(exclude_none=True)
-                for name, module in model.modules.items()
-            }
+            result["modules"] = {name: module.model_dump(exclude_none=True) for name, module in model.modules.items()}
 
         if model.rules:
             result["rules"] = {"forbid": [rule.model_dump() for rule in model.rules.forbid]}
@@ -84,14 +79,12 @@ class MCPFormatter:
 
         if model.api.public:
             result["api"]["public"] = {
-                name: export.model_dump(exclude_none=True)
-                for name, export in model.api.public.items()
+                name: export.model_dump(exclude_none=True) for name, export in model.api.public.items()
             }
 
         if model.api.internal:
             result["api"]["internal"] = {
-                name: export.model_dump(exclude_none=True)
-                for name, export in model.api.internal.items()
+                name: export.model_dump(exclude_none=True) for name, export in model.api.internal.items()
             }
 
         if model.rules:

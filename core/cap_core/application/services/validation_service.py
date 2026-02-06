@@ -83,16 +83,20 @@ class ValidationService:
                 loader()
                 validation.results.append(ValidationResult(file=filename, valid=True))
             except ValidationError as e:
-                validation.results.append(ValidationResult(
-                    file=filename,
-                    valid=False,
-                    error=str(e),
-                ))
+                validation.results.append(
+                    ValidationResult(
+                        file=filename,
+                        valid=False,
+                        error=str(e),
+                    )
+                )
             except FileReaderError as e:
-                validation.results.append(ValidationResult(
-                    file=filename,
-                    valid=False,
-                    error=e.message,
-                ))
+                validation.results.append(
+                    ValidationResult(
+                        file=filename,
+                        valid=False,
+                        error=e.message,
+                    )
+                )
 
         return validation

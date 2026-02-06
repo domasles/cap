@@ -25,4 +25,3 @@ def print_warning(message: str):
 def print_info(message: str):
     """Print info message in blue."""
     console.print(f"[INFO] {message}", style="bold blue")
-
