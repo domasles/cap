@@ -2,11 +2,11 @@
 
 import sys
 import click
-from pathlib import Path
 import shutil
-import importlib.resources
 
-from ..utils import get_workspace, find_cap_directory, console, print_success, print_error, print_info, print_warning
+from pathlib import Path
+
+from ..utils import get_workspace, console, print_success, print_error, print_info, print_warning
 
 
 @click.command()

@@ -50,6 +50,7 @@ def validate_workspace(workspace: Path) -> tuple[bool, str]:
         return False, f"Workspace is not a directory: {workspace}"
 
     cap_dir = find_cap_directory(workspace)
+
     if cap_dir is None:
         return False, f"No .cap/ directory found in {workspace}"
 

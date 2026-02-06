@@ -42,8 +42,8 @@ dependencies = [
 "Documentation" = "https://github.com/domasles/cap#readme"
 
 [tool.setuptools.dynamic]
-version = {attr = "src.meta.__version__"}
+version = {attr = "cap_mcp.meta.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["cap_mcp*"]

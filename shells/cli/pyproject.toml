@@ -47,8 +47,8 @@ dependencies = [
 cap = "cap_cli.main:cli"
 
 [tool.setuptools.dynamic]
-version = {attr = "src.meta.__version__"}
+version = {attr = "cap_cli.meta.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["cap_cli*"]
