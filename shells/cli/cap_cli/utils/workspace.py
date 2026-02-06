@@ -3,6 +3,8 @@
 from pathlib import Path
 from typing import Optional
 
+from cap_core.infrastructure import FileReader
+
 
 def get_workspace(path: Optional[str] = None) -> Path:
     """
@@ -17,20 +19,6 @@ def get_workspace(path: Optional[str] = None) -> Path:
     if path is None:
         return Path.cwd()
     return Path(path).resolve()
-
-
-def find_cap_directory(workspace: Path) -> Optional[Path]:
-    """
-    Find .cap/ directory in workspace.
-
-    Args:
-        workspace: Workspace root path
-
-    Returns:
-        Path to .cap/ directory if found, None otherwise
-    """
-    cap_dir = workspace / ".cap"
-    return cap_dir if cap_dir.exists() and cap_dir.is_dir() else None
 
 
 def validate_workspace(workspace: Path) -> tuple[bool, str]:
@@ -49,7 +37,7 @@ def validate_workspace(workspace: Path) -> tuple[bool, str]:
     if not workspace.is_dir():
         return False, f"Workspace is not a directory: {workspace}"
 
-    cap_dir = find_cap_directory(workspace)
+    cap_dir = FileReader.find_cap_directory(str(workspace))
 
     if cap_dir is None:
         return False, f"No .cap/ directory found in {workspace}"

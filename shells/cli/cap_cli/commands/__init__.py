@@ -1,5 +1,5 @@
 """CLI command modules."""
 
-from . import serve, init
+from . import serve, init, validate
 
-__all__ = ["serve", "init"]
+__all__ = ["serve", "init", "validate"]

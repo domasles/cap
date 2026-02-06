@@ -1,7 +1,5 @@
 """MCP Tools - Codebase Awareness Protocol."""
 
-from .dependencies import DependenciesTool
-from .architecture import ArchitectureTool
-from .api import ApiTool
+from . import dependencies, architecture, api
 
-__all__ = ["DependenciesTool", "ArchitectureTool", "ApiTool"]
+__all__ = ["dependencies", "architecture", "api"]

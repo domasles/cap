@@ -22,6 +22,7 @@ class ConfigService:
         """
         self.workspace_path = workspace_path
         self.file_reader = FileReader()
+        self.cap_dir = self.file_reader.find_cap_directory(self.workspace_path)
 
     def load_dependencies(self) -> Optional[DependenciesYAML]:
         """
@@ -34,11 +35,11 @@ class ConfigService:
             ValidationError: If file structure is invalid (from Pydantic)
             FileReaderError: If file cannot be read
         """
-        cap_dir = self.file_reader.find_cap_directory(self.workspace_path)
-        if cap_dir is None:
+
+        if self.cap_dir is None:
             return None
 
-        dependencies_file = cap_dir / "dependencies.yaml"
+        dependencies_file = self.cap_dir / "dependencies.yaml"
         if not dependencies_file.exists():
             return None
 
@@ -56,11 +57,11 @@ class ConfigService:
             ValidationError: If file structure is invalid (from Pydantic)
             FileReaderError: If file cannot be read
         """
-        cap_dir = self.file_reader.find_cap_directory(self.workspace_path)
-        if cap_dir is None:
+
+        if self.cap_dir is None:
             return None
 
-        architecture_file = cap_dir / "architecture.yaml"
+        architecture_file = self.cap_dir / "architecture.yaml"
         if not architecture_file.exists():
             return None
 
@@ -78,33 +79,13 @@ class ConfigService:
             ValidationError: If file structure is invalid (from Pydantic)
             FileReaderError: If file cannot be read
         """
-        cap_dir = self.file_reader.find_cap_directory(self.workspace_path)
-        if cap_dir is None:
+
+        if self.cap_dir is None:
             return None
 
-        api_file = cap_dir / "api.yaml"
+        api_file = self.cap_dir / "api.yaml"
         if not api_file.exists():
             return None
 
         data = self.file_reader.read_yaml(str(api_file))
         return ApiYAML.model_validate(data)
-
-    def load_all(self) -> dict:
-        """
-        Load all CAP configuration files as MCP-ready JSON.
-
-        Returns:
-            Dict with keys 'dependencies', 'architecture', 'api'
-            (values are MCP-ready JSON dicts or None if file doesn't exist)
-        """
-        deps = self.load_dependencies()
-        arch = self.load_architecture()
-        api = self.load_api()
-
-        formatter = MCPFormatter()
-
-        return {
-            "dependencies": formatter.format_dependencies(deps) if deps else None,
-            "architecture": formatter.format_architecture(arch) if arch else None,
-            "api": formatter.format_api(api) if api else None,
-        }

@@ -1,43 +1,21 @@
 """API tool for MCP."""
 
+from mcp.server.fastmcp import FastMCP
+
 from cap_core import ConfigService
 from cap_core.application import MCPFormatter
 
 
-class ApiTool:
-    """Tool for retrieving API exports."""
+def register(server: FastMCP, config_service: ConfigService) -> None:
+    """Register the get_api tool on the server."""
 
-    @staticmethod
-    def get_definition() -> dict:
-        """
-        Get MCP tool definition.
-
-        Returns:
-            Tool definition dict
-        """
-        return {
-            "name": "get_api",
-            "description": "Get public and internal API exports with usage rules. Shows exported functions/classes, their locations, stability markers, and access restrictions.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {},
-            },
-        }
-
-    @staticmethod
-    def execute(workspace_path: str, arguments: dict) -> dict:
-        """
-        Execute the tool.
-
-        Args:
-            workspace_path: Path to workspace root
-            arguments: Tool arguments (empty for this tool)
-
-        Returns:
-            API data or error
-        """
+    @server.tool(
+        name="get_api",
+        description="Get public and internal API exports with usage rules. Shows exported functions/classes, their locations, stability markers, and access restrictions.",
+    )
+    def get_api() -> dict:
+        """Get public and internal API exports with usage rules."""
         try:
-            config_service = ConfigService(workspace_path)
             api = config_service.load_api()
 
             if api is None:

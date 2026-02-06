@@ -3,7 +3,7 @@
 import click
 
 from .meta import __version__
-from .commands import serve, init
+from .commands import serve, init, validate
 
 
 @click.group()
@@ -21,6 +21,7 @@ def cli(ctx):
 # Register command groups
 cli.add_command(serve.serve)
 cli.add_command(init.init)
+cli.add_command(validate.validate)
 
 
 def main():

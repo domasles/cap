@@ -1,43 +1,21 @@
 """Dependencies tool for MCP."""
 
+from mcp.server.fastmcp import FastMCP
+
 from cap_core import ConfigService
 from cap_core.application import MCPFormatter
 
 
-class DependenciesTool:
-    """Tool for retrieving project dependencies."""
+def register(server: FastMCP, config_service: ConfigService) -> None:
+    """Register the get_dependencies tool on the server."""
 
-    @staticmethod
-    def get_definition() -> dict:
-        """
-        Get MCP tool definition.
-
-        Returns:
-            Tool definition dict
-        """
-        return {
-            "name": "get_dependencies",
-            "description": "Get project dependencies, versions, and dependency rules. Returns runtime and dev dependencies organized by language, with rules for forbidden dependency patterns.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {},
-            },
-        }
-
-    @staticmethod
-    def execute(workspace_path: str, arguments: dict) -> dict:
-        """
-        Execute the tool.
-
-        Args:
-            workspace_path: Path to workspace root
-            arguments: Tool arguments (empty for this tool)
-
-        Returns:
-            Dependencies data or error
-        """
+    @server.tool(
+        name="get_dependencies",
+        description="Get project dependencies, versions, and dependency rules. Returns runtime and dev dependencies organized by language, with rules for forbidden dependency patterns.",
+    )
+    def get_dependencies() -> dict:
+        """Get project dependencies, versions, and dependency rules."""
         try:
-            config_service = ConfigService(workspace_path)
             deps = config_service.load_dependencies()
 
             if deps is None:

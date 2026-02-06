@@ -1,5 +1,5 @@
 """Application layer - orchestrates parsing and processing."""
 
-from .services import ConfigService, MCPFormatter
+from .services import ConfigService, ValidationService, ValidationResult, WorkspaceValidation, MCPFormatter
 
-__all__ = ["ConfigService", "MCPFormatter"]
+__all__ = ["ConfigService", "ValidationService", "ValidationResult", "WorkspaceValidation", "MCPFormatter"]

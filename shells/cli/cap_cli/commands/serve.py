@@ -15,7 +15,7 @@ def serve(workspace):
     WORKSPACE is the path to the workspace root. Defaults to current directory.
 
     This command is typically used by IDE extensions to spawn an MCP server
-    process that communicates over stdin/stdout using JSON-RPC 2.0.
+    process that communicates over stdin/stdout using the MCP protocol.
 
     Example:
         cap serve                    # Serve current directory
@@ -31,19 +31,19 @@ def serve(workspace):
         sys.exit(1)
 
     try:
-        from cap_mcp import MCPServer
+        from cap_mcp import create_server
     except ImportError:
         print_error("cap_mcp package not found. Install with: pip install cap_mcp")
         sys.exit(1)
 
-    # Log to stderr (stdout is for JSON-RPC)
+    # Log to stderr (stdout is for MCP protocol)
     print(f"Starting MCP server for workspace: {workspace_path}", file=sys.stderr)
     print("Listening on stdin/stdout...", file=sys.stderr)
 
-    # Start server (blocks until stdin closes)
+    # Create and run FastMCP server in stdio mode
     try:
-        server = MCPServer(str(workspace_path))
-        server.run_stdio()
+        server = create_server(str(workspace_path))
+        server.run(transport="stdio")
     except KeyboardInterrupt:
         print("\nServer stopped by user", file=sys.stderr)
         sys.exit(0)

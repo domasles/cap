@@ -1,6 +1,6 @@
 """MCP Server package - Codebase-Awareness Protocol."""
 
-from .server import MCPServer
+from .server import create_server
 from .meta import __version__
 
-__all__ = ["MCPServer", "__version__"]
+__all__ = ["create_server", "__version__"]

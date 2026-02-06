@@ -1,43 +1,21 @@
 """Architecture tool for MCP."""
 
+from mcp.server.fastmcp import FastMCP
+
 from cap_core import ConfigService
 from cap_core.application import MCPFormatter
 
 
-class ArchitectureTool:
-    """Tool for retrieving codebase architecture."""
+def register(server: FastMCP, config_service: ConfigService) -> None:
+    """Register the get_architecture tool on the server."""
 
-    @staticmethod
-    def get_definition() -> dict:
-        """
-        Get MCP tool definition.
-
-        Returns:
-            Tool definition dict
-        """
-        return {
-            "name": "get_architecture",
-            "description": "Get codebase architecture including style, layers, modules, and architectural rules. Shows ownership patterns, import restrictions, and bounded contexts.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {},
-            },
-        }
-
-    @staticmethod
-    def execute(workspace_path: str, arguments: dict) -> dict:
-        """
-        Execute the tool.
-
-        Args:
-            workspace_path: Path to workspace root
-            arguments: Tool arguments (empty for this tool)
-
-        Returns:
-            Architecture data or error
-        """
+    @server.tool(
+        name="get_architecture",
+        description="Get codebase architecture including style, layers, modules, and architectural rules. Shows ownership patterns, import restrictions, and bounded contexts.",
+    )
+    def get_architecture() -> dict:
+        """Get codebase architecture including style, layers, modules, and rules."""
         try:
-            config_service = ConfigService(workspace_path)
             arch = config_service.load_architecture()
 
             if arch is None:
