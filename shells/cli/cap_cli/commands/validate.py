@@ -1,5 +1,6 @@
 """Validate command - Check .cap/ configuration files."""
 
+import json
 import sys
 import click
 
@@ -8,7 +9,8 @@ from ..utils import get_workspace, validate_workspace, console, print_success, p
 
 @click.command()
 @click.argument("workspace", type=click.Path(exists=True), default=".", required=False)
-def validate(workspace):
+@click.option("--json", "json_output", is_flag=True, help="Output results as JSON for programmatic use")
+def validate(workspace, json_output):
     """
     Validate .cap/ configuration files in a workspace.
 
@@ -19,12 +21,15 @@ def validate(workspace):
     Example:
         cap validate                    # Validate current directory
         cap validate /path/to/project   # Validate specific project
+        cap validate --json             # Output as JSON
     """
     workspace_path = get_workspace(workspace)
 
-    # Quick check that .cap/ exists
     is_valid, error_msg = validate_workspace(workspace_path)
     if not is_valid:
+        if json_output:
+            print(json.dumps({"error": error_msg, "results": []}))
+            sys.exit(1)
         print_error(error_msg)
         console.print(f"\nRun 'cap init' in {workspace_path} to create .cap/ directory.", style="yellow")
         sys.exit(1)
@@ -32,6 +37,9 @@ def validate(workspace):
     try:
         from cap_core import ConfigService, ValidationService
     except ImportError:
+        if json_output:
+            print(json.dumps({"error": "cap_core package not found", "results": []}))
+            sys.exit(1)
         print_error("cap_core package not found. Install with: pip install cap_core")
         sys.exit(1)
 
@@ -39,12 +47,16 @@ def validate(workspace):
     validation_service = ValidationService(config_service)
     result = validation_service.validate_all()
 
+    if json_output:
+        output = [{"file": r.file, "valid": r.valid, "errors": r.errors} for r in result.results]
+        print(json.dumps(output))
+        sys.exit(0 if result.all_valid else 1)
+
     if not result.results:
         print_info("No configuration files found in .cap/ directory.")
         console.print("Run 'cap init' to create template files.", style="dim")
         sys.exit(0)
 
-    # Print results
     has_errors = False
 
     for file_result in result.results:
@@ -53,9 +65,9 @@ def validate(workspace):
         else:
             has_errors = True
             print_error(f"{file_result.file}")
-            console.print(f"  {file_result.error}", style="dim")
+            for err in file_result.errors:
+                console.print(f"  {err}", style="dim")
 
-    # Summary
     valid_count = sum(1 for r in result.results if r.valid)
     total_count = len(result.results)
 

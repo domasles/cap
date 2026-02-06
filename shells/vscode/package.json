@@ -1,0 +1,81 @@
+{
+  "name": "cap-vscode",
+  "displayName": "CAP - Codebase Awareness Protocol",
+  "description": "Automatic MCP server for AI coding agents to understand your codebase architecture, dependencies, and API",
+  "version": "0.1.0",
+  "publisher": "domasles",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/domasles/cap"
+  },
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "mcp",
+    "model-context-protocol",
+    "codebase",
+    "architecture",
+    "copilot"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cap.init",
+        "title": "CAP: Initialize Configuration"
+      },
+      {
+        "command": "cap.initForce",
+        "title": "CAP: Reinitialize Configuration (Overwrite)"
+      },
+      {
+        "command": "cap.validate",
+        "title": "CAP: Validate Configuration"
+      }
+    ],
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "cap",
+        "label": "CAP - Codebase Awareness Protocol"
+      }
+    ],
+    "configuration": {
+      "title": "CAP",
+      "properties": {
+        "cap.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to Python interpreter. Leave empty for auto-detection."
+        },
+        "cap.autoInit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prompt to initialize .cap/ when a workspace has no configuration."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.config.mjs --production",
+    "watch": "node esbuild.config.mjs --watch",
+    "lint": "eslint src/",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.1",
+    "@types/vscode": "^1.109.0",
+    "esbuild": "^0.27.3",
+    "typescript": "^5.9.3"
+  }
+}

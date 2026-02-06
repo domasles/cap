@@ -84,7 +84,7 @@ def init(workspace, force, minimal):
             console.print(f"  1. Edit the template files in {cap_dir}/", style="dim")
             console.print(f"  2. Remove any files you don't need", style="dim")
             console.print(f"  3. Run 'cap validate' to check your configuration", style="dim")
-            console.print(f"  4. Run 'cap serve stdio' to start the MCP server\n", style="dim")
+            console.print(f"  4. Run 'cap serve' to start the MCP server manually\n", style="dim")
         else:
             print_error("No template files were copied")
             sys.exit(1)

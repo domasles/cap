@@ -1,0 +1,4 @@
+# CAP Dev dependencies
+-e ./core/
+-e ./mcp/
+-e ./shells/cli/

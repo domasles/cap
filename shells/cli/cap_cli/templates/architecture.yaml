@@ -29,14 +29,19 @@ layers:
     may_import:
       - "domain"
 
-# Optional: Define modules and their purposes
-# modules:
-#   user_management:
-#     owns: "src/modules/users/**"
-#     purpose: "Handle user authentication and authorization"
-#     owner: "auth-team"
-#     forbidden_imports:
-#       - "src/modules/billing/**"
+# Define modules and their purposes
+modules:
+  core:
+    owns: "src/core/**"
+    purpose: "Core business logic and domain models"
+  
+  # Add more modules here
+  # module_name:
+  #   owns: "src/module/**"
+  #   purpose: "What this module is responsible for"
+  #   owner: "team-name"            # optional
+  #   forbidden_imports:             # optional
+  #     - "src/other_module/**"
 
 # Optional: Define architectural rules
 # rules:

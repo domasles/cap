@@ -1,6 +1,9 @@
 # Python
 __pycache__/
 
+# Node
+node_modules/
+
 # Build outputs
 build/
 dist/
@@ -10,7 +13,7 @@ dist/
 venv/
 
 # IDE
-.vscode/
+.vscode/mcp.json
 
 # Application specific
 *.db

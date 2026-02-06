@@ -1,7 +1,7 @@
 """Validation service - validates CAP configuration files."""
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import ValidationError
 
@@ -15,7 +15,7 @@ class ValidationResult:
 
     file: str
     valid: bool
-    error: Optional[str] = None
+    errors: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -83,11 +83,15 @@ class ValidationService:
                 loader()
                 validation.results.append(ValidationResult(file=filename, valid=True))
             except ValidationError as e:
+                errors = []
+                for err in e.errors():
+                    loc = ".".join(str(part) for part in err["loc"])
+                    errors.append(f"{loc}: {err['msg']}")
                 validation.results.append(
                     ValidationResult(
                         file=filename,
                         valid=False,
-                        error=str(e),
+                        errors=errors,
                     )
                 )
             except FileReaderError as e:
@@ -95,7 +99,7 @@ class ValidationService:
                     ValidationResult(
                         file=filename,
                         valid=False,
-                        error=e.message,
+                        errors=[e.message],
                     )
                 )
 

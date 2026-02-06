@@ -44,6 +44,7 @@ api:
         - "ApiExport"
         - "ApiRule"
         - "ApiSection"
+      stability: "experimental"
       warning: "Use through ConfigService - do not import models directly unless extending CAP"
 
     infrastructure:
@@ -51,6 +52,7 @@ api:
       exports:
         - "FileReader"
         - "FileReaderError"
+      stability: "experimental"
       warning: "Internal to cap-core - use ConfigService instead of FileReader directly"
 
     mcp_tools:
@@ -59,6 +61,7 @@ api:
         - "dependencies.register"
         - "architecture.register"
         - "api.register"
+      stability: "experimental"
       warning: "Internal to cap-mcp - tool registration happens in server.py"
 
     cli_utils:
@@ -71,6 +74,7 @@ api:
         - "print_error"
         - "print_warning"
         - "print_info"
+      stability: "experimental"
       warning: "Internal to cap-cli"
 
 rules:

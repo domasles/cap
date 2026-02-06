@@ -28,6 +28,7 @@ api:
       exports:
         - "helper_function"
         - "internal_validator"
+      stability: "experimental"
       warning: "Internal use only - may change without notice"
     
     # Add more internal API exports here

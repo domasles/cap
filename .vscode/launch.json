@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run CAP Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/shells/vscode"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/shells/vscode/dist/**/*.js"
+      ],
+      "preLaunchTask": "build-vscode-extension"
+    }
+  ]
+}

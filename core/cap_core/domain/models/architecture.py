@@ -2,11 +2,13 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ArchitectureStyle(BaseModel):
     """Architecture style definition."""
+
+    model_config = ConfigDict(extra="forbid")
 
     style: str
 
@@ -14,12 +16,16 @@ class ArchitectureStyle(BaseModel):
 class Layer(BaseModel):
     """Layer definition."""
 
+    model_config = ConfigDict(extra="forbid")
+
     owns: str
     may_import: List[str]
 
 
 class Module(BaseModel):
     """Module definition."""
+
+    model_config = ConfigDict(extra="forbid")
 
     owns: str
     purpose: str
@@ -30,6 +36,8 @@ class Module(BaseModel):
 class ArchitectureRule(BaseModel):
     """Architecture restriction rule."""
 
+    model_config = ConfigDict(extra="forbid")
+
     path: str
     calls: str
     reason: str
@@ -38,14 +46,19 @@ class ArchitectureRule(BaseModel):
 class ArchitectureRules(BaseModel):
     """Rules section wrapper."""
 
-    forbid: List[ArchitectureRule]
+    model_config = ConfigDict(extra="forbid")
+
+    forbid: Optional[List[ArchitectureRule]] = None
+    permit: Optional[List[ArchitectureRule]] = None
 
 
 class ArchitectureYAML(BaseModel):
     """Root model for architecture.yaml - matches YAML structure exactly."""
 
+    model_config = ConfigDict(extra="forbid")
+
     architecture: ArchitectureStyle
-    layers: Optional[Dict[str, Layer]] = None
-    modules: Optional[Dict[str, Module]] = None
+    layers: Dict[str, Layer]
+    modules: Dict[str, Module]
     rules: Optional[ArchitectureRules] = None
     notes: Optional[List[str]] = None
