@@ -1,2 +1,6 @@
+# CAP Core requirements
 pyyaml>=6.0.3
 pydantic>=2.12.5
+
+# Build dependencies
+setuptools>=80.10.2

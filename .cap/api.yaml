@@ -1,0 +1,91 @@
+# CAP Project API
+
+api:
+  public:
+    cap_core:
+      location: "core/cap_core/__init__.py"
+      exports:
+        - "ConfigService"
+        - "ValidationService"
+        - "ValidationResult"
+        - "WorkspaceValidation"
+        - "MCPFormatter"
+        - "__version__"
+      stability: "experimental"
+
+    cap_mcp:
+      location: "mcp/cap_mcp/__init__.py"
+      exports:
+        - "create_server"
+        - "__version__"
+      stability: "experimental"
+
+    cap_cli:
+      location: "shells/cli/cap_cli/main.py"
+      exports:
+        - "cli"
+        - "main"
+      stability: "experimental"
+
+  internal:
+    domain_models:
+      location: "core/cap_core/domain/models/**"
+      exports:
+        - "DependenciesYAML"
+        - "ArchitectureYAML"
+        - "ApiYAML"
+        - "PackageInfo"
+        - "LanguageDependencies"
+        - "DependencyRule"
+        - "ArchitectureStyle"
+        - "Layer"
+        - "Module"
+        - "ArchitectureRule"
+        - "ApiExport"
+        - "ApiRule"
+        - "ApiSection"
+      warning: "Use through ConfigService - do not import models directly unless extending CAP"
+
+    infrastructure:
+      location: "core/cap_core/infrastructure/**"
+      exports:
+        - "FileReader"
+        - "FileReaderError"
+      warning: "Internal to cap-core - use ConfigService instead of FileReader directly"
+
+    mcp_tools:
+      location: "mcp/cap_mcp/tools/**"
+      exports:
+        - "dependencies.register"
+        - "architecture.register"
+        - "api.register"
+      warning: "Internal to cap-mcp - tool registration happens in server.py"
+
+    cli_utils:
+      location: "shells/cli/cap_cli/utils/**"
+      exports:
+        - "get_workspace"
+        - "validate_workspace"
+        - "console"
+        - "print_success"
+        - "print_error"
+        - "print_warning"
+        - "print_info"
+      warning: "Internal to cap-cli"
+
+rules:
+  forbid:
+    - path: "mcp/cap_mcp/tools/**"
+      api: "internal.infrastructure"
+      reason: "MCP tools should use ConfigService, not FileReader directly"
+    - path: "shells/cli/**"
+      api: "internal.infrastructure"
+      reason: "CLI should use ConfigService, not FileReader directly"
+      exceptions:
+        workspace_utils: "shells/cli/cap_cli/utils/workspace.py"
+
+notes:
+  - "ConfigService is the primary facade for all config loading operations"
+  - "ValidationService is the primary facade for all validation operations"
+  - "create_server() is the composition root for the MCP server"
+  - "Domain models are Pydantic BaseModel subclasses - use model_validate() and model_dump()"

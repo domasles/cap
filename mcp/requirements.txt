@@ -1,2 +1,8 @@
-cap_core==0.1.0
+# Cap MCP requirements
 mcp[cli]>=1.26.0
+
+# Core dependencies
+cap_core==0.1.0
+
+# Build dependencies
+setuptools>=80.10.2

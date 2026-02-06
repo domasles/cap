@@ -1,0 +1,47 @@
+# CAP Project Dependencies
+
+dependencies:
+  python:
+    runtime:
+      pyyaml:
+        version: ">=6.0.3"
+        reason: "YAML parsing for .cap/ configuration files"
+      pydantic:
+        version: ">=2.12.5"
+        reason: "Domain model validation and serialization using Python type annotations"
+      mcp:
+        version: ">=1.26.0"
+        reason: "Official MCP SDK providing FastMCP server, protocol handling, and stdio transport"
+      click:
+        version: ">=8.3.1"
+        reason: "CLI framework for building the cap command-line interface"
+      rich:
+        version: ">=13.3.2"
+        reason: "Terminal output formatting with colors and styles"
+
+    dev:
+      setuptools:
+        version: ">=80.10.2"
+        reason: "Package building and distribution"
+
+rules:
+  forbid:
+    - layer: "domain"
+      dependency: "pyyaml"
+      reason: "Domain models must not depend on YAML parsing - that belongs in infrastructure"
+    - layer: "domain"
+      dependency: "mcp"
+      reason: "Domain models must not depend on MCP SDK - protocol concerns belong in the mcp shell"
+    - layer: "domain"
+      dependency: "click"
+      reason: "Domain models must not depend on CLI framework - that belongs in the cli shell"
+    - layer: "domain"
+      dependency: "rich"
+      reason: "Domain models must not depend on output formatting - that belongs in the cli shell"
+
+notes:
+  - "This is a monorepo with 3 packages: cap-core, cap-mcp, and cap-cli"
+  - "cap-core has zero MCP/CLI dependencies - only pyyaml and pydantic"
+  - "cap-mcp depends on cap-core and mcp SDK"
+  - "cap-cli depends on cap-mcp (which transitively pulls in cap-core)"
+  - "All packages require Python >=3.10"

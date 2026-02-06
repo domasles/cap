@@ -1,0 +1,9 @@
+# CAP CLI requirements
+click>=8.3.1
+rich>=13.3.2
+
+# Core dependencies
+cap-mcp==0.1.0
+
+# Build dependencies
+setuptools>=80.10.2
