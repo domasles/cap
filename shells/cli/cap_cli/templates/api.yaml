@@ -38,7 +38,7 @@ api:
 #     - path: "tests/**"
 #       api: "internal.database"
 #       reason: "Tests should use public API only"
-#       except:
+#       exceptions:
 #         integration_tests: "tests/integration/**"
 
 # Optional: Additional notes for API consumers

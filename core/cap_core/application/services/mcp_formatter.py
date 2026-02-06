@@ -95,12 +95,7 @@ class MCPFormatter:
             }
 
         if model.rules:
-            result["rules"] = {"forbid": []}
-            for rule in model.rules.forbid:
-                rule_dict = rule.model_dump(exclude={"except_"})
-                if rule.except_:
-                    rule_dict["except"] = rule.except_
-                result["rules"]["forbid"].append(rule_dict)
+            result["rules"] = {"forbid": [rule.model_dump() for rule in model.rules.forbid]}
 
         if model.notes:
             result["notes"] = model.notes

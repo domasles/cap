@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ApiExport(BaseModel):
@@ -20,7 +20,7 @@ class ApiRule(BaseModel):
     path: str
     api: str
     reason: str
-    except_: Optional[Dict[str, str]] = Field(default=None, alias="except")
+    exceptions: Optional[Dict[str, str]] = None
 
 
 class ApiRules(BaseModel):
