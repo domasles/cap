@@ -79,28 +79,27 @@ class ValidationService:
             if not file_path.exists():
                 continue
 
+            errors: list[str] = []
+
+            dupes = self.config_service.file_reader.find_duplicate_keys(str(file_path))
+            for dupe in dupes:
+                errors.append(f"duplicate key: {dupe}")
+
             try:
                 loader()
-                validation.results.append(ValidationResult(file=filename, valid=True))
             except ValidationError as e:
-                errors = []
                 for err in e.errors():
                     loc = ".".join(str(part) for part in err["loc"])
                     errors.append(f"{loc}: {err['msg']}")
-                validation.results.append(
-                    ValidationResult(
-                        file=filename,
-                        valid=False,
-                        errors=errors,
-                    )
-                )
             except FileReaderError as e:
-                validation.results.append(
-                    ValidationResult(
-                        file=filename,
-                        valid=False,
-                        errors=[e.message],
-                    )
+                errors.append(e.message)
+
+            validation.results.append(
+                ValidationResult(
+                    file=filename,
+                    valid=len(errors) == 0,
+                    errors=errors,
                 )
+            )
 
         return validation

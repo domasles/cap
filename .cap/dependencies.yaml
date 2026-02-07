@@ -24,6 +24,19 @@ dependencies:
         version: ">=80.10.2"
         reason: "Package building and distribution"
 
+  typescript:
+    runtime:
+      vscode:
+        version: "^1.99.0"
+        reason: "VS Code extension API for commands, MCP server provider, file watchers, and diagnostics"
+    dev:
+      esbuild:
+        version: "^0.27.3"
+        reason: "Fast bundler for the VS Code extension"
+      typescript:
+        version: "^5.9.3"
+        reason: "TypeScript compiler for type-safe extension development"
+
 rules:
   forbid:
     - layer: "domain"
@@ -40,8 +53,10 @@ rules:
       reason: "Domain models must not depend on output formatting - that belongs in the cli shell"
 
 notes:
-  - "This is a monorepo with 3 packages: cap-core, cap-mcp, and cap-cli"
+  - "This is a monorepo with 4 packages: cap-core, cap-mcp, cap-cli (Python) and cap-vscode (TypeScript)"
   - "cap-core has zero MCP/CLI dependencies - only pyyaml and pydantic"
   - "cap-mcp depends on cap-core and mcp SDK"
   - "cap-cli depends on cap-mcp (which transitively pulls in cap-core)"
-  - "All packages require Python >=3.10"
+  - "cap-vscode calls cap-cli as a subprocess - it never imports Python directly"
+  - "All Python packages require Python >=3.10"
+  - "cap-vscode requires VS Code >=1.99.0 and Node.js >=18"

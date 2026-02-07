@@ -7,7 +7,8 @@ from .commands import serve, init, validate
 
 
 @click.group()
-@click.version_option(version=__version__, prog_name="cap")
+@click.version_option(__version__, "-v", "--version", prog_name="cap")
+@click.help_option("-h", "--help")
 @click.pass_context
 def cli(ctx):
     """

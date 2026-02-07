@@ -1,7 +1,7 @@
 """File reader for CAP configuration files."""
 
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import yaml
 
@@ -18,6 +18,21 @@ class FileReaderError(Exception):
         """
         self.message = message
         super().__init__(self.message)
+
+
+def _collect_duplicate_keys(node: yaml.Node, path: List[str], duplicates: List[str]) -> None:
+    """Walk a YAML node tree and record paths with duplicate mapping keys."""
+    if not isinstance(node, yaml.MappingNode):
+        return
+
+    seen: dict[str, bool] = {}
+    for key_node, value_node in node.value:
+        key = str(key_node.value)
+        if key in seen:
+            duplicates.append(".".join(path + [key]))
+        else:
+            seen[key] = True
+            _collect_duplicate_keys(value_node, path + [key], duplicates)
 
 
 class FileReader:
@@ -82,3 +97,38 @@ class FileReader:
             return cap_dir
 
         return None
+
+    @staticmethod
+    def find_duplicate_keys(file_path: str) -> List[str]:
+        """
+        Find duplicate YAML mapping keys in a file.
+
+        YAML silently overwrites duplicate keys. This method detects them
+        by walking the raw node tree before values are merged.
+
+        Args:
+            file_path: Path to YAML file
+
+        Returns:
+            List of dotted paths where duplicates were found, e.g.
+            ["api.public.cap_vscode", "api.internal.vscode_setup"]
+        """
+        path = Path(file_path)
+
+        if not path.exists():
+            return []
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            root = yaml.compose(content, Loader=yaml.SafeLoader)
+        except yaml.YAMLError:
+            return []
+
+        if root is None:
+            return []
+
+        duplicates: List[str] = []
+        _collect_duplicate_keys(root, [], duplicates)
+        return duplicates

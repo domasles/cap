@@ -22,7 +22,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const env = await setupEnvironment(context, output);
 
   if (!env) {
-    output.appendLine("Setup failed — extension inactive.");
+    output.appendLine("Setup failed - extension inactive.");
     return;
   }
 

@@ -1,5 +1,5 @@
 /**
- * Validate .cap/ files — command palette action + live file watcher with diagnostics.
+ * Validate .cap/ files - command palette action + live file watcher with diagnostics.
  */
 
 import * as vscode from "vscode";

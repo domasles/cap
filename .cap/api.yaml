@@ -27,6 +27,13 @@ api:
         - "main"
       stability: "experimental"
 
+    cap_vscode:
+      location: "shells/vscode/src/extension.ts"
+      exports:
+        - "activate"
+        - "deactivate"
+      stability: "experimental"
+
   internal:
     domain_models:
       location: "core/cap_core/domain/models/**"
@@ -76,6 +83,25 @@ api:
         - "print_info"
       stability: "experimental"
       warning: "Internal to cap-cli"
+
+    vscode_setup:
+      location: "shells/vscode/src/setup/**"
+      exports:
+        - "findPython"
+        - "setupEnvironment"
+        - "checkForUpdate"
+      stability: "experimental"
+      warning: "Internal to cap-vscode"
+
+    vscode_utils:
+      location: "shells/vscode/src/utils/**"
+      exports:
+        - "pickWorkspaceFolder"
+        - "getCapExecutable"
+        - "getVenvPython"
+        - "createCapDirectoryWatcher"
+      stability: "experimental"
+      warning: "Internal to cap-vscode"
 
 rules:
   forbid:

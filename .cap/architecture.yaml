@@ -32,6 +32,10 @@ layers:
       - "domain"
       - "mcp_shell"
 
+  vscode_shell:
+    owns: "shells/vscode/src/**"
+    may_import: []
+
 modules:
   cap_core:
     owns: "core/cap_core/**"
@@ -44,6 +48,10 @@ modules:
   cap_cli:
     owns: "shells/cli/cap_cli/**"
     purpose: "CLI shell - provides cap init, cap serve, and cap validate commands"
+
+  cap_vscode:
+    owns: "shells/vscode/src/**"
+    purpose: "VS Code extension - discovers Python, manages isolated venv, registers MCP server provider, runs cap CLI as subprocess"
 
 rules:
   forbid:
@@ -65,10 +73,14 @@ rules:
     - path: "mcp/cap_mcp/**"
       calls: "rich"
       reason: "MCP shell must not use terminal formatting - stdout is for MCP protocol"
+    - path: "shells/vscode/src/**"
+      calls: "import"
+      reason: "VS Code extension is TypeScript - it must never import Python modules directly"
 
 notes:
-  - "This is a monorepo with 3 independently-installable packages"
-  - "Dependency flow: cli -> mcp -> core. Never the reverse."
+  - "This is a monorepo with 4 packages: cap-core, cap-mcp, cap-cli (Python) and cap-vscode (TypeScript)"
+  - "Python dependency flow: cli -> mcp -> core. Never the reverse."
+  - "cap-vscode calls cap CLI as a subprocess - it never imports Python"
   - "Domain models (Pydantic BaseModel) are pure data - no I/O, no side effects"
   - "ConfigService is the main entry point for loading configs from core"
   - "ValidationService handles validation concerns separately from loading"
@@ -76,3 +88,4 @@ notes:
   - "FileReader is the only class that touches the filesystem"
   - "server.py is the composition root for the MCP server - wires ConfigService into tools"
   - "Each MCP tool is in its own file with a register() function that closes over ConfigService"
+  - "The VS Code extension uses vscode.lm.registerMcpServerDefinitionProvider for agent discovery"
