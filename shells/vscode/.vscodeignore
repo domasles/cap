@@ -3,13 +3,8 @@ src/**
 
 # Node
 node_modules/**
-
-# IDE
-.vscode/**
+package-lock.json
 
 # Config
 tsconfig.json
 esbuild.config.mjs
-
-# Git
-.gitignore

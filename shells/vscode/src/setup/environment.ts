@@ -24,10 +24,25 @@ export async function setupEnvironment(
 ): Promise<CapEnvironment | undefined> {
   const isDev = context.extensionMode === vscode.ExtensionMode.Development;
 
+  const python = await findPython(output);
+  if (!python) {
+    vscode.window
+      .showErrorMessage(
+        "CAP: Python ≥3.10 not found. Install Python and reload, or set cap.pythonPath.",
+        "Get Python"
+      )
+      .then((choice) => {
+        if (choice === "Get Python") {
+          vscode.env.openExternal(vscode.Uri.parse("https://www.python.org/downloads/"));
+        }
+      });
+    return undefined;
+  }
+
   if (isDev) {
     return setupDev(output);
   }
-  return setupProduction(context, output);
+  return setupProduction(context, output, python);
 }
 
 async function setupDev(
@@ -47,22 +62,9 @@ async function setupDev(
 
 async function setupProduction(
   context: vscode.ExtensionContext,
-  output: vscode.OutputChannel
+  output: vscode.OutputChannel,
+  systemPython: string
 ): Promise<CapEnvironment | undefined> {
-  const systemPython = await findPython(output);
-  if (!systemPython) {
-    vscode.window
-      .showErrorMessage(
-        "CAP: Python ≥3.10 not found. Install Python and reload, or set cap.pythonPath.",
-        "Get Python"
-      )
-      .then((choice) => {
-        if (choice === "Get Python") {
-          vscode.env.openExternal(vscode.Uri.parse("https://www.python.org/downloads/"));
-        }
-      });
-    return undefined;
-  }
 
   const venvDir = path.join(context.globalStorageUri.fsPath, VENV_DIR_NAME);
   const capPath = getCapExecutable(venvDir);
