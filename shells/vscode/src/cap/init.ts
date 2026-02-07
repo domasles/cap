@@ -7,10 +7,10 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { CAP_DIR_NAME } from "../constants";
-import type { CapEnvironment } from "../setup/environment";
+import type { Environment } from "../setup/environment";
 import { pickWorkspaceFolder } from "../utils/workspace";
 
-export async function promptInitForWorkspaces(env: CapEnvironment): Promise<void> {
+export async function promptInitForWorkspaces(env: Environment): Promise<void> {
   const autoInit = vscode.workspace.getConfiguration("cap").get<boolean>("autoInit", true);
   if (!autoInit) {
     return;
@@ -33,7 +33,7 @@ export async function promptInitForWorkspaces(env: CapEnvironment): Promise<void
 
 export function registerInitCommands(
   context: vscode.ExtensionContext,
-  env: CapEnvironment
+  env: Environment
 ): void {
   context.subscriptions.push(
     vscode.commands.registerCommand("cap.init", async () => {
@@ -51,7 +51,7 @@ export function registerInitCommands(
   );
 }
 
-function runCapInit(env: CapEnvironment, workspacePath: string, force: boolean): void {
+function runCapInit(env: Environment, workspacePath: string, force: boolean): void {
   const args = ["init"];
   if (force) {
     args.push("--force");

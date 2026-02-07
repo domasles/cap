@@ -3,12 +3,15 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { CAP_DIR_NAME } from "../constants";
+import type { FileSystemWatcher } from "../utils/fileSystemWatcher";
 
 const MCP_NOTICE_KEY = "cap.mcpNoticeShown";
 
-export function registerMcpNotice(context: vscode.ExtensionContext): vscode.Disposable {
-  const watcher = vscode.workspace.createFileSystemWatcher("**/.cap", false, true, true);
-  watcher.onDidCreate(() => showNotice(context));
+export function registerMcpNotice(
+  context: vscode.ExtensionContext,
+  capWatcher: FileSystemWatcher
+): void {
+  capWatcher.onDidCreate(() => showNotice(context));
 
   const hasCapAlready = (vscode.workspace.workspaceFolders ?? []).some((f) =>
     fs.existsSync(path.join(f.uri.fsPath, CAP_DIR_NAME))
@@ -16,8 +19,6 @@ export function registerMcpNotice(context: vscode.ExtensionContext): vscode.Disp
   if (hasCapAlready) {
     showNotice(context);
   }
-
-  return watcher;
 }
 
 function showNotice(context: vscode.ExtensionContext): void {

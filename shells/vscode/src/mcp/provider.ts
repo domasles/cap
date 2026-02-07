@@ -7,11 +7,13 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { CAP_DIR_NAME, MCP_PROVIDER_ID } from "../constants";
-import type { CapEnvironment } from "../setup/environment";
+import type { Environment } from "../setup/environment";
+import type { FileSystemWatcher } from "../utils/fileSystemWatcher";
 
 export function registerMcpProvider(
   context: vscode.ExtensionContext,
-  env: CapEnvironment
+  env: Environment,
+  capWatcher: FileSystemWatcher
 ): vscode.Disposable {
   const onDidChange = new vscode.EventEmitter<void>();
 
@@ -39,7 +41,6 @@ export function registerMcpProvider(
     provider
   );
 
-  const capWatcher = vscode.workspace.createFileSystemWatcher("**/.cap", false, true, false);
   capWatcher.onDidCreate(() => onDidChange.fire());
   capWatcher.onDidDelete(() => onDidChange.fire());
 
@@ -47,5 +48,5 @@ export function registerMcpProvider(
     onDidChange.fire()
   );
 
-  return vscode.Disposable.from(registration, capWatcher, foldersWatcher, onDidChange);
+  return vscode.Disposable.from(registration, foldersWatcher, onDidChange);
 }

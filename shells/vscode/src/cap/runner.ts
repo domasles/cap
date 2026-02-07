@@ -4,8 +4,9 @@
 
 import { execFile } from "child_process";
 import { promisify } from "util";
+import type { OutputChannel } from "vscode";
 
-import type { CapEnvironment } from "../setup/environment";
+import type { Environment } from "../setup/environment";
 
 const execFileAsync = promisify(execFile);
 
@@ -16,20 +17,28 @@ export interface CapResult {
 }
 
 export async function runCap(
-  env: CapEnvironment,
+  env: Environment,
   args: string[],
-  cwd?: string
+  cwd?: string,
+  output?: OutputChannel
 ): Promise<CapResult> {
   try {
     const { stdout, stderr } = await execFileAsync(env.capPath, args, {
       timeout: 30000,
       cwd,
     });
+    if (stderr && output) {
+      output.appendLine(`[cap ${args[0]}] ${stderr.trim()}`);
+    }
     return { stdout, stderr, exitCode: 0 };
   } catch (err: any) {
+    const stderr = err.stderr ?? "";
+    if (stderr && output) {
+      output.appendLine(`[cap ${args[0]}] ${stderr.trim()}`);
+    }
     return {
       stdout: err.stdout ?? "",
-      stderr: err.stderr ?? "",
+      stderr,
       exitCode: err.code ?? 1,
     };
   }
@@ -42,10 +51,11 @@ export interface ValidationFileResult {
 }
 
 export async function runValidateJson(
-  env: CapEnvironment,
-  workspacePath: string
+  env: Environment,
+  workspacePath: string,
+  output?: OutputChannel
 ): Promise<ValidationFileResult[]> {
-  const result = await runCap(env, ["validate", "--json", workspacePath], workspacePath);
+  const result = await runCap(env, ["validate", "--json", workspacePath], workspacePath, output);
   try {
     return JSON.parse(result.stdout.trim());
   } catch {

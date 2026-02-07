@@ -15,14 +15,14 @@ import { getCapExecutable, getVenvPython } from "../utils/venv";
 
 const execFileAsync = promisify(execFile);
 
-export interface CapEnvironment {
+export interface Environment {
   capPath: string;
 }
 
 export async function setupEnvironment(
   context: vscode.ExtensionContext,
   output: vscode.OutputChannel
-): Promise<CapEnvironment | undefined> {
+): Promise<Environment | undefined> {
   const isDev = context.extensionMode === vscode.ExtensionMode.Development;
 
   const python = await findPython(output);
@@ -48,7 +48,7 @@ export async function setupEnvironment(
 
 async function setupDev(
   output: vscode.OutputChannel
-): Promise<CapEnvironment | undefined> {
+): Promise<Environment | undefined> {
   try {
     await execFileAsync("cap", ["--version"], { timeout: 5000 });
     output.appendLine("Dev mode: cap found on PATH.");
@@ -65,7 +65,7 @@ async function setupProduction(
   context: vscode.ExtensionContext,
   output: vscode.OutputChannel,
   systemPython: string
-): Promise<CapEnvironment | undefined> {
+): Promise<Environment | undefined> {
 
   const venvDir = path.join(context.globalStorageUri.fsPath, VENV_DIR_NAME);
   const capPath = getCapExecutable(venvDir);

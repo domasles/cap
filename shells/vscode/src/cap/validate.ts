@@ -7,13 +7,14 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { CAP_DIR_NAME } from "../constants";
-import type { CapEnvironment } from "../setup/environment";
+import type { Environment } from "../setup/environment";
 import { runValidateJson, type ValidationFileResult } from "./runner";
 import { pickWorkspaceFolder } from "../utils/workspace";
 
 export function registerValidation(
   context: vscode.ExtensionContext,
-  env: CapEnvironment
+  env: Environment,
+  output: vscode.OutputChannel
 ): vscode.Disposable {
   const diagnostics = vscode.languages.createDiagnosticCollection("cap");
 
@@ -24,7 +25,7 @@ export function registerValidation(
       if (!folder) {
         return;
       }
-      const results = await runValidateJson(env, folder);
+      const results = await runValidateJson(env, folder, output);
       updateDiagnostics(folder, results, diagnostics);
 
       const errors = results.filter((r) => !r.valid);
@@ -62,7 +63,7 @@ export function registerValidation(
       key,
       setTimeout(async () => {
         timers.delete(key);
-        const results = await runValidateJson(env, folder.uri.fsPath);
+        const results = await runValidateJson(env, folder.uri.fsPath, output);
         updateDiagnostics(folder.uri.fsPath, results, diagnostics);
       }, 500)
     );
@@ -75,7 +76,7 @@ export function registerValidation(
   // Initial validation for workspaces that already have .cap/
   for (const folder of vscode.workspace.workspaceFolders ?? []) {
     if (fs.existsSync(path.join(folder.uri.fsPath, CAP_DIR_NAME))) {
-      runValidateJson(env, folder.uri.fsPath).then((results) =>
+      runValidateJson(env, folder.uri.fsPath, output).then((results) =>
         updateDiagnostics(folder.uri.fsPath, results, diagnostics)
       );
     }

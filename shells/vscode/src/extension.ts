@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { OUTPUT_CHANNEL_NAME } from "./constants";
 import { setupEnvironment } from "./setup/environment";
 import { checkForUpdate } from "./setup/updater";
+import { createCapDirectoryWatcher } from "./utils/fileSystemWatcher";
 import { registerMcpProvider } from "./mcp/provider";
 import { registerMcpNotice } from "./mcp/notice";
 import { registerInitCommands, promptInitForWorkspaces } from "./cap/init";
@@ -25,12 +26,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     return;
   }
 
-  context.subscriptions.push(registerMcpProvider(context, env));
+  const capWatcher = createCapDirectoryWatcher();
+  context.subscriptions.push(capWatcher);
+
+  context.subscriptions.push(registerMcpProvider(context, env, capWatcher));
   registerInitCommands(context, env);
-  context.subscriptions.push(registerValidation(context, env));
+  context.subscriptions.push(registerValidation(context, env, output));
 
   promptInitForWorkspaces(env);
-  context.subscriptions.push(registerMcpNotice(context));
+  registerMcpNotice(context, capWatcher);
   checkForUpdate(context, env.capPath, output);
 
   output.appendLine("CAP activated.");
