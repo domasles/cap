@@ -1,5 +1,5 @@
 /**
- * Find a Python ≥3.10 interpreter on the system.
+ * Find a Python ≥3.11 interpreter on the system.
  */
 
 import * as vscode from "vscode";
@@ -59,7 +59,7 @@ export async function findPython(
     }
   }
 
-  output.appendLine("No Python ≥3.10 found.");
+  output.appendLine("No Python ≥3.11 found.");
   return undefined;
 }
 

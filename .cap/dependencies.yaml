@@ -58,5 +58,5 @@ notes:
   - "cap-mcp depends on cap-core and mcp SDK"
   - "cap-cli depends on cap-mcp (which transitively pulls in cap-core)"
   - "cap-vscode calls cap-cli as a subprocess - it never imports Python directly"
-  - "All Python packages require Python >=3.10"
-  - "cap-vscode requires VS Code >=1.99.0 and Node.js >=18"
+  - "All Python packages require Python >=3.11"
+  - "cap-vscode requires VS Code >=1.109.0 and Node.js >=20"

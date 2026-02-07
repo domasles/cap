@@ -29,7 +29,7 @@ export async function setupEnvironment(
   if (!python) {
     vscode.window
       .showErrorMessage(
-        "CAP: Python ≥3.10 not found. Install Python and reload, or set cap.pythonPath.",
+        "CAP: Python ≥3.11 not found. Install Python and reload, or set cap.pythonPath.",
         "Get Python"
       )
       .then((choice) => {
