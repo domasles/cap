@@ -5,6 +5,7 @@ import { promisify } from "util";
 import * as https from "https";
 
 import { CAP_CLI_PACKAGE, VENV_DIR_NAME } from "../constants";
+import { getVenvPython } from "../utils/venv";
 
 const execFileAsync = promisify(execFile);
 
@@ -97,10 +98,7 @@ async function runUpdate(
   output: vscode.OutputChannel
 ): Promise<void> {
   const venvDir = path.join(context.globalStorageUri.fsPath, VENV_DIR_NAME);
-  const venvPython =
-    process.platform === "win32"
-      ? path.join(venvDir, "Scripts", "python.exe")
-      : path.join(venvDir, "bin", "python");
+  const venvPython = getVenvPython(venvDir);
 
   output.appendLine(`Updating ${CAP_CLI_PACKAGE}...`);
   try {

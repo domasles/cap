@@ -10,10 +10,22 @@ import { MIN_PYTHON_VERSION } from "../constants";
 
 const execFileAsync = promisify(execFile);
 
-const CANDIDATES: string[] =
+interface PythonCandidate {
+  cmd: string;
+  args: string[];
+}
+
+const CANDIDATES: PythonCandidate[] =
   process.platform === "win32"
-    ? ["python", "python3", "py -3"]
-    : ["python3", "python"];
+    ? [
+        { cmd: "python", args: [] },
+        { cmd: "python3", args: [] },
+        { cmd: "py", args: ["-3"] },
+      ]
+    : [
+        { cmd: "python3", args: [] },
+        { cmd: "python", args: [] },
+      ];
 
 export async function findPython(
   output: vscode.OutputChannel
@@ -26,18 +38,16 @@ export async function findPython(
     return configured;
   }
 
-  for (const candidate of CANDIDATES) {
-    const parts = candidate.split(" ");
-    const cmd = parts[0];
+  for (const { cmd, args } of CANDIDATES) {
     try {
-      const { stdout } = await execFileAsync(cmd, [...parts.slice(1), "--version"], {
+      const { stdout } = await execFileAsync(cmd, [...args, "--version"], {
         timeout: 5000,
       });
       if (meetsVersion(stdout.trim())) {
-        if (parts.length > 1) {
+        if (args.length > 0) {
           const { stdout: exe } = await execFileAsync(
             cmd,
-            [...parts.slice(1), "-c", "import sys; print(sys.executable)"],
+            [...args, "-c", "import sys; print(sys.executable)"],
             { timeout: 5000 }
           );
           return exe.trim();

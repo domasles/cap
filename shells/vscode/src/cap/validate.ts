@@ -9,11 +9,11 @@ import * as fs from "fs";
 import { CAP_DIR_NAME } from "../constants";
 import type { CapEnvironment } from "../setup/environment";
 import { runValidateJson, type ValidationFileResult } from "./runner";
+import { pickWorkspaceFolder } from "../utils/workspace";
 
 export function registerValidation(
   context: vscode.ExtensionContext,
-  env: CapEnvironment,
-  output: vscode.OutputChannel
+  env: CapEnvironment
 ): vscode.Disposable {
   const diagnostics = vscode.languages.createDiagnosticCollection("cap");
 
@@ -122,19 +122,4 @@ function updateDiagnostics(
       diagnostics.set(fileUri, []);
     }
   }
-}
-
-async function pickWorkspaceFolder(): Promise<string | undefined> {
-  const folders = vscode.workspace.workspaceFolders;
-  if (!folders || folders.length === 0) {
-    vscode.window.showWarningMessage("CAP: No workspace folder is open.");
-    return undefined;
-  }
-  if (folders.length === 1) {
-    return folders[0].uri.fsPath;
-  }
-  const picked = await vscode.window.showWorkspaceFolderPick({
-    placeHolder: "Select workspace to validate",
-  });
-  return picked?.uri.fsPath;
 }

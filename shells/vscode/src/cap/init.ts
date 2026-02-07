@@ -8,6 +8,7 @@ import * as fs from "fs";
 
 import { CAP_DIR_NAME } from "../constants";
 import type { CapEnvironment } from "../setup/environment";
+import { pickWorkspaceFolder } from "../utils/workspace";
 
 export async function promptInitForWorkspaces(env: CapEnvironment): Promise<void> {
   const autoInit = vscode.workspace.getConfiguration("cap").get<boolean>("autoInit", true);
@@ -57,32 +58,13 @@ function runCapInit(env: CapEnvironment, workspacePath: string, force: boolean):
   }
   args.push(workspacePath);
 
-  const terminal = vscode.window.createTerminal({
-    name: "CAP Init",
-    cwd: workspacePath,
-  });
-
-  const quoted = args.map((a) => `"${a}"`).join(" ");
-  const cmd =
-    process.platform === "win32"
-      ? `& "${env.capPath}" ${quoted}`
-      : `"${env.capPath}" ${quoted}`;
-
-  terminal.sendText(cmd);
-  terminal.show();
-}
-
-async function pickWorkspaceFolder(): Promise<string | undefined> {
-  const folders = vscode.workspace.workspaceFolders;
-  if (!folders || folders.length === 0) {
-    vscode.window.showWarningMessage("CAP: No workspace folder is open.");
-    return undefined;
-  }
-  if (folders.length === 1) {
-    return folders[0].uri.fsPath;
-  }
-  const picked = await vscode.window.showWorkspaceFolderPick({
-    placeHolder: "Select workspace folder",
-  });
-  return picked?.uri.fsPath;
+  const task = new vscode.Task(
+    { type: "cap", task: "init" },
+    vscode.TaskScope.Workspace,
+    "CAP Init",
+    "cap",
+    new vscode.ShellExecution(env.capPath, args, { cwd: workspacePath })
+  );
+  task.presentationOptions = { reveal: vscode.TaskRevealKind.Always };
+  vscode.tasks.executeTask(task);
 }

@@ -11,6 +11,7 @@ import { promisify } from "util";
 
 import { CAP_CLI_PACKAGE, VENV_DIR_NAME } from "../constants";
 import { findPython } from "./python";
+import { getCapExecutable, getVenvPython } from "../utils/venv";
 
 const execFileAsync = promisify(execFile);
 
@@ -70,37 +71,34 @@ async function setupProduction(
   const capPath = getCapExecutable(venvDir);
 
   if (!fs.existsSync(capPath)) {
-    output.appendLine(`Creating venv at ${venvDir}...`);
-    try {
-      fs.mkdirSync(path.dirname(venvDir), { recursive: true });
-      await execFileAsync(systemPython, ["-m", "venv", venvDir]);
-    } catch (err: any) {
-      vscode.window.showErrorMessage(`CAP: Failed to create venv. ${err.message}`);
-      return undefined;
-    }
+    const ok = await vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Notification, title: "CAP: Setting up environment..." },
+      async () => {
+        output.appendLine(`Creating venv at ${venvDir}...`);
+        try {
+          fs.mkdirSync(path.dirname(venvDir), { recursive: true });
+          await execFileAsync(systemPython, ["-m", "venv", venvDir]);
+        } catch (err: any) {
+          vscode.window.showErrorMessage(`CAP: Failed to create venv. ${err.message}`);
+          return false;
+        }
 
-    output.appendLine(`Installing ${CAP_CLI_PACKAGE}...`);
-    const venvPython = getVenvPython(venvDir);
-    try {
-      await execFileAsync(venvPython, ["-m", "pip", "install", "--upgrade", CAP_CLI_PACKAGE]);
-    } catch (err: any) {
-      vscode.window.showErrorMessage(`CAP: Failed to install ${CAP_CLI_PACKAGE}. ${err.message}`);
+        output.appendLine(`Installing ${CAP_CLI_PACKAGE}...`);
+        const venvPython = getVenvPython(venvDir);
+        try {
+          await execFileAsync(venvPython, ["-m", "pip", "install", "--upgrade", CAP_CLI_PACKAGE]);
+        } catch (err: any) {
+          vscode.window.showErrorMessage(`CAP: Failed to install ${CAP_CLI_PACKAGE}. ${err.message}`);
+          return false;
+        }
+        return true;
+      }
+    );
+    if (!ok) {
       return undefined;
     }
   }
 
   output.appendLine(`cap executable: ${capPath}`);
   return { capPath };
-}
-
-function getCapExecutable(venvDir: string): string {
-  return process.platform === "win32"
-    ? path.join(venvDir, "Scripts", "cap.exe")
-    : path.join(venvDir, "bin", "cap");
-}
-
-function getVenvPython(venvDir: string): string {
-  return process.platform === "win32"
-    ? path.join(venvDir, "Scripts", "python.exe")
-    : path.join(venvDir, "bin", "python");
 }

@@ -27,7 +27,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   context.subscriptions.push(registerMcpProvider(context, env));
   registerInitCommands(context, env);
-  context.subscriptions.push(registerValidation(context, env, output));
+  context.subscriptions.push(registerValidation(context, env));
 
   promptInitForWorkspaces(env);
   context.subscriptions.push(registerMcpNotice(context));
