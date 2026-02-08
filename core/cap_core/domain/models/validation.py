@@ -1,7 +1,7 @@
 """Validation domain models - pure data structures for validation results."""
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 
 
 @dataclass
@@ -12,6 +12,10 @@ class ValidationIssue:
     line: Optional[int] = None
     column: Optional[int] = None
 
+    def __post_init__(self) -> None:
+        if (self.line is None) != (self.column is None):
+            raise ValueError("line and column must both be set or both be None")
+
 
 @dataclass
 class ValidationResult:
@@ -19,7 +23,7 @@ class ValidationResult:
 
     file: str
     valid: bool
-    errors: List[ValidationIssue] = field(default_factory=list)
+    errors: list[ValidationIssue] = field(default_factory=list)
 
 
 @dataclass
@@ -28,7 +32,7 @@ class WorkspaceValidation:
 
     workspace_path: str
     cap_directory_found: bool
-    results: List[ValidationResult] = field(default_factory=list)
+    results: list[ValidationResult] = field(default_factory=list)
 
     @property
     def is_valid(self) -> bool:

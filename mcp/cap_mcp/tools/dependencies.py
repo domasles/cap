@@ -1,9 +1,13 @@
 """Dependencies tool for MCP."""
 
+import logging
+
 from mcp.server.fastmcp import FastMCP
 
 from cap_core import ConfigService
 from cap_core.application import MCPFormatter
+
+logger = logging.getLogger(__name__)
 
 
 def register(server: FastMCP, config_service: ConfigService, formatter: MCPFormatter) -> None:
@@ -27,4 +31,5 @@ def register(server: FastMCP, config_service: ConfigService, formatter: MCPForma
             return formatter.format_dependencies(deps)
 
         except Exception as e:
+            logger.exception("Failed to load dependencies config")
             return {"error": f"Failed to load dependencies: {str(e)}"}

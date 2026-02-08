@@ -41,12 +41,12 @@ export function registerMcpProvider(
     provider
   );
 
-  capWatcher.onDidCreate(() => onDidChange.fire());
-  capWatcher.onDidDelete(() => onDidChange.fire());
+  const createSub = capWatcher.onDidCreate(() => onDidChange.fire());
+  const deleteSub = capWatcher.onDidDelete(() => onDidChange.fire());
 
   const foldersWatcher = vscode.workspace.onDidChangeWorkspaceFolders(() =>
     onDidChange.fire()
   );
 
-  return vscode.Disposable.from(registration, foldersWatcher, onDidChange);
+  return vscode.Disposable.from(registration, foldersWatcher, createSub, deleteSub, onDidChange);
 }

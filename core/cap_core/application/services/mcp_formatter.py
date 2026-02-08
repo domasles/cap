@@ -24,7 +24,6 @@ class MCPFormatter:
         """
         result = model.model_dump(exclude_none=True)
 
-        # Remove empty rules dict (when both forbid and permit are None)
         if "rules" in result and not result["rules"]:
             del result["rules"]
 

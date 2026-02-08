@@ -1,11 +1,15 @@
 """File reader for CAP configuration files."""
 
-from pathlib import Path
-from typing import List, Optional, Sequence, Tuple, Union
-
+import logging
 import yaml
 
+from pathlib import Path
+from typing import Optional, Sequence, Union
+
+
 from ..domain.models.validation import ValidationIssue
+
+logger = logging.getLogger(__name__)
 
 
 class FileReaderError(Exception):
@@ -24,8 +28,8 @@ class FileReaderError(Exception):
 
 def _collect_duplicate_keys(
     node: yaml.Node,
-    path: List[str],
-    duplicates: List[ValidationIssue],
+    path: list[str],
+    duplicates: list[ValidationIssue],
 ) -> None:
     """Walk a YAML node tree and record paths with duplicate mapping keys."""
     if not isinstance(node, yaml.MappingNode):
@@ -166,10 +170,11 @@ class FileReader:
 
             return yaml.compose(content, Loader=yaml.SafeLoader)
         except yaml.YAMLError:
+            logger.debug("YAML composition failed for %s", file_path)
             return None
 
     @staticmethod
-    def find_duplicate_keys(root: yaml.Node) -> List[ValidationIssue]:
+    def find_duplicate_keys(root: yaml.Node) -> list[ValidationIssue]:
         """
         Find duplicate YAML mapping keys in a composed node tree.
 
@@ -182,12 +187,12 @@ class FileReader:
         Returns:
             List of ValidationIssue for each duplicate key found
         """
-        duplicates: List[ValidationIssue] = []
+        duplicates: list[ValidationIssue] = []
         _collect_duplicate_keys(root, [], duplicates)
         return duplicates
 
     @staticmethod
-    def resolve_yaml_line(root: yaml.Node, loc: Sequence[Union[str, int]]) -> Tuple[Optional[int], Optional[int]]:
+    def resolve_yaml_line(root: yaml.Node, loc: Sequence[Union[str, int]]) -> tuple[Optional[int], Optional[int]]:
         """
         Resolve a Pydantic error location to a line and column in a YAML node tree.
 

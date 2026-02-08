@@ -11,7 +11,8 @@ export function registerMcpNotice(
   context: vscode.ExtensionContext,
   capWatcher: FileSystemWatcher
 ): void {
-  capWatcher.onDidCreate(() => showNotice(context));
+  const sub = capWatcher.onDidCreate(() => showNotice(context));
+  context.subscriptions.push(sub);
 
   const hasCapAlready = (vscode.workspace.workspaceFolders ?? []).some((f) =>
     fs.existsSync(path.join(f.uri.fsPath, CAP_DIR_NAME))

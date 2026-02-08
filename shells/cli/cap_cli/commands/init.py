@@ -89,6 +89,6 @@ def init(workspace, force, minimal):
             print_error("No template files were copied")
             sys.exit(1)
 
-    except Exception as e:
+    except OSError as e:
         print_error(f"Failed to copy template files: {e}")
         sys.exit(1)
