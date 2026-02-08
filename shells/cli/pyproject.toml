@@ -7,7 +7,7 @@ name = "cap-cli"
 dynamic = ["version"]
 description = "CAP CLI: Command-line interface for Codebase Awareness Protocol"
 
-readme = "../../README.md"
+readme = "README.md"
 authors = [{name = "Domas Leščinskas", email = "domas.lescinskas@gmail.com"}]
 license = {text = "Apache-2.0"}
 

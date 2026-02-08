@@ -30,8 +30,10 @@ jobs:
       - name: Build extension
         run: npm run build
 
-      - name: Copy README
-        run: cp ../../README.md .
+      - name: Copy shared files
+        run: |
+          cp ../../README.md .
+          cp ../../LICENSE .
 
       - name: Package .vsix
         run: npx @vscode/vsce package --no-dependencies -o cap-vscode-${{ github.event.release.tag_name }}.vsix
