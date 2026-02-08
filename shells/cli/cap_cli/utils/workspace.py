@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Optional
 
-from cap_core.infrastructure import FileReader
+from cap_core import ConfigService
 
 
 def get_workspace(path: Optional[str] = None) -> Path:
@@ -37,7 +37,7 @@ def validate_workspace(workspace: Path) -> tuple[bool, str]:
     if not workspace.is_dir():
         return False, f"Workspace is not a directory: {workspace}"
 
-    cap_dir = FileReader.find_cap_directory(str(workspace))
+    cap_dir = ConfigService.find_cap_directory(str(workspace))
 
     if cap_dir is None:
         return False, f"No .cap/ directory found in {workspace}"

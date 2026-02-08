@@ -37,5 +37,5 @@ class WorkspaceValidation:
 
     @property
     def all_valid(self) -> bool:
-        """True if all found files are valid."""
-        return self.cap_directory_found and all(r.valid for r in self.results)
+        """True if .cap/ exists, at least one file was checked, and all are valid."""
+        return self.cap_directory_found and len(self.results) > 0 and all(r.valid for r in self.results)

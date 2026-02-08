@@ -83,7 +83,12 @@ def validate(workspace, json_output, file_filter):
             has_errors = True
             print_error(f"{file_result.file}")
             for err in file_result.errors:
-                line_info = f"Line {err.line + 1}, column {err.column + 1}" if err.line is not None else ""
+                if err.line is not None:
+                    line_info = f"Line {err.line + 1}"
+                    if err.column is not None:
+                        line_info += f", column {err.column + 1}"
+                else:
+                    line_info = ""
                 prefix = f"  {line_info}: " if line_info else "  "
                 console.print(f"{prefix}{err.message}", style="dim")
 

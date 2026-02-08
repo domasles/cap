@@ -7,6 +7,7 @@ api:
       exports:
         - "ConfigService"
         - "ValidationService"
+        - "ValidationIssue"
         - "ValidationResult"
         - "WorkspaceValidation"
         - "MCPFormatter"
@@ -51,6 +52,9 @@ api:
         - "ApiExport"
         - "ApiRule"
         - "ApiSection"
+        - "ValidationIssue"
+        - "ValidationResult"
+        - "WorkspaceValidation"
       stability: "experimental"
       warning: "Use through ConfigService - do not import models directly unless extending CAP"
 
@@ -111,11 +115,10 @@ rules:
     - path: "shells/cli/**"
       api: "internal.infrastructure"
       reason: "CLI should use ConfigService, not FileReader directly"
-      exceptions:
-        workspace_utils: "shells/cli/cap_cli/utils/workspace.py"
 
 notes:
   - "ConfigService is the primary facade for all config loading operations"
   - "ValidationService is the primary facade for all validation operations"
   - "create_server() is the composition root for the MCP server"
-  - "Domain models are Pydantic BaseModel subclasses - use model_validate() and model_dump()"
+  - "Config domain models (DependenciesYAML, ArchitectureYAML, ApiYAML) are Pydantic BaseModel subclasses - use model_validate() and model_dump()"
+  - "Validation domain models (ValidationIssue, ValidationResult, WorkspaceValidation) are stdlib dataclasses - pure data, no Pydantic dependency"

@@ -3,11 +3,10 @@
 from pathlib import Path
 from typing import Optional, Type, TypeVar
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from ...domain.models import DependenciesYAML, ArchitectureYAML, ApiYAML
-from ...infrastructure import FileReader, FileReaderError
-from .mcp_formatter import MCPFormatter
+from ...infrastructure import FileReader
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -50,6 +49,21 @@ class ConfigService:
 
         data = self.file_reader.read_yaml(str(file_path))
         return model_class.model_validate(data)
+
+    @staticmethod
+    def find_cap_directory(workspace_path: str) -> Optional[Path]:
+        """
+        Check if a workspace has a .cap/ directory.
+
+        Convenience wrapper so shells don't need to import FileReader directly.
+
+        Args:
+            workspace_path: Path to workspace root
+
+        Returns:
+            Path to .cap/ directory if found, None otherwise
+        """
+        return FileReader.find_cap_directory(workspace_path)
 
     def load_dependencies(self) -> Optional[DependenciesYAML]:
         """Load and parse dependencies.yaml."""

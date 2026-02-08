@@ -33,9 +33,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   registerInitCommands(context, env);
   context.subscriptions.push(registerValidation(context, env, output));
 
-  promptInitForWorkspaces(env);
+  promptInitForWorkspaces(env).catch(() => {});
   registerMcpNotice(context, capWatcher);
-  checkForUpdate(context, env.capPath, output);
+  checkForUpdate(context, env.capPath, output).catch(() => {});
 
   output.appendLine("CAP activated.");
 }
