@@ -109,10 +109,12 @@ function updateDiagnostics(
   for (const result of results) {
     const fileUri = vscode.Uri.file(path.join(capDir, result.file));
     if (!result.valid && result.errors.length > 0) {
-      const items = result.errors.map((msg) => {
+      const items = result.errors.map((err) => {
+        const line = err.line ?? 0;
+        const col = err.column ?? 0;
         const d = new vscode.Diagnostic(
-          new vscode.Range(0, 0, 0, 0),
-          msg,
+          new vscode.Range(line, col, line, Number.MAX_SAFE_INTEGER),
+          err.message,
           vscode.DiagnosticSeverity.Error
         );
         d.source = "CAP";

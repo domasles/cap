@@ -11,7 +11,7 @@ def register(server: FastMCP, config_service: ConfigService) -> None:
 
     @server.tool(
         name="get_dependencies",
-        description="Get project dependencies, versions, and dependency rules. Returns runtime and dev dependencies organized by language, with rules for forbidden dependency patterns.",
+        description="Call this when understanding what libraries are available and what dependency rules apply. Returns runtime and dev dependencies with version constraints and forbidden-dependency rules per layer. Use this before adding imports or suggesting new packages.",
     )
     def get_dependencies() -> dict:
         """Get project dependencies, versions, and dependency rules."""

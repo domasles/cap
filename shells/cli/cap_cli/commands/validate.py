@@ -48,7 +48,14 @@ def validate(workspace, json_output):
     result = validation_service.validate_all()
 
     if json_output:
-        output = [{"file": r.file, "valid": r.valid, "errors": r.errors} for r in result.results]
+        output = [
+            {
+                "file": r.file,
+                "valid": r.valid,
+                "errors": [{"message": e.message, "line": e.line, "column": e.column} for e in r.errors],
+            }
+            for r in result.results
+        ]
         print(json.dumps(output))
         sys.exit(0 if result.all_valid else 1)
 
@@ -66,7 +73,9 @@ def validate(workspace, json_output):
             has_errors = True
             print_error(f"{file_result.file}")
             for err in file_result.errors:
-                console.print(f"  {err}", style="dim")
+                line_info = f"Line {err.line + 1}, column {err.column + 1}" if err.line >= 0 else ""
+                prefix = f"  {line_info}: " if line_info else "  "
+                console.print(f"{prefix}{err.message}", style="dim")
 
     valid_count = sum(1 for r in result.results if r.valid)
     total_count = len(result.results)

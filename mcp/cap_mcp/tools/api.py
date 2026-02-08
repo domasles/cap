@@ -11,7 +11,7 @@ def register(server: FastMCP, config_service: ConfigService) -> None:
 
     @server.tool(
         name="get_api",
-        description="Get public and internal API exports with usage rules. Shows exported functions/classes, their locations, stability markers, and access restrictions.",
+        description="Call this before reading source files to understand the codebase surface. Returns all public and internal exports, their file locations, stability markers, and access rules. Use this to understand WHAT exists and how components connect before diving into implementation details.",
     )
     def get_api() -> dict:
         """Get public and internal API exports with usage rules."""

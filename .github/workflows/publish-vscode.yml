@@ -6,7 +6,7 @@ on:
 
 jobs:
   publish-vscode:
-    name: Build and publish to VS Code marketplaces
+    name: Build and publish to VS Code marketplace
     runs-on: ubuntu-latest
 
     permissions:
@@ -32,7 +32,3 @@ jobs:
 
       - name: Publish to VS Code Marketplace
         run: npx @vscode/vsce publish --no-dependencies -p ${{ secrets.VSCE_PAT }}
-
-      - name: Publish to Open VSX Registry
-        run: npx ovsx publish --no-dependencies -p ${{ secrets.OVSX_PAT }}
-        continue-on-error: true

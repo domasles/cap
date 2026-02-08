@@ -1,40 +1,12 @@
 """Validation service - validates CAP configuration files."""
 
-from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import ValidationError
 
+from ...domain.models.validation import ValidationIssue, ValidationResult, WorkspaceValidation
 from ...infrastructure import FileReaderError
 from .config_service import ConfigService
-
-
-@dataclass
-class ValidationResult:
-    """Result of validating a single CAP configuration file."""
-
-    file: str
-    valid: bool
-    errors: List[str] = field(default_factory=list)
-
-
-@dataclass
-class WorkspaceValidation:
-    """Result of validating an entire workspace's CAP configuration."""
-
-    workspace_path: str
-    cap_directory_found: bool
-    results: list[ValidationResult] = field(default_factory=list)
-
-    @property
-    def is_valid(self) -> bool:
-        """True if .cap/ exists and at least one file is valid."""
-        return self.cap_directory_found and any(r.valid for r in self.results)
-
-    @property
-    def all_valid(self) -> bool:
-        """True if all found files are valid."""
-        return self.cap_directory_found and all(r.valid for r in self.results)
 
 
 class ValidationService:
@@ -79,20 +51,29 @@ class ValidationService:
             if not file_path.exists():
                 continue
 
-            errors: list[str] = []
+            errors: list[ValidationIssue] = []
+            root = self.config_service.file_reader.compose_yaml(str(file_path))
 
-            dupes = self.config_service.file_reader.find_duplicate_keys(str(file_path))
-            for dupe in dupes:
-                errors.append(f"duplicate key: {dupe}")
+            if root is not None:
+                errors.extend(self.config_service.file_reader.find_duplicate_keys(root))
 
             try:
                 loader()
             except ValidationError as e:
                 for err in e.errors():
                     loc = ".".join(str(part) for part in err["loc"])
-                    errors.append(f"{loc}: {err['msg']}")
+                    line, col = (0, 0)
+                    if root is not None:
+                        line, col = self.config_service.file_reader.resolve_yaml_line(root, err["loc"])
+                    errors.append(
+                        ValidationIssue(
+                            message=f"{loc}: {err['msg']}",
+                            line=line,
+                            column=col,
+                        )
+                    )
             except FileReaderError as e:
-                errors.append(e.message)
+                errors.append(ValidationIssue(message=e.message))
 
             validation.results.append(
                 ValidationResult(

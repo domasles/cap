@@ -44,10 +44,16 @@ export async function runCap(
   }
 }
 
+export interface ValidationErrorItem {
+  message: string;
+  line: number;
+  column: number;
+}
+
 export interface ValidationFileResult {
   file: string;
   valid: boolean;
-  errors: string[];
+  errors: ValidationErrorItem[];
 }
 
 export async function runValidateJson(

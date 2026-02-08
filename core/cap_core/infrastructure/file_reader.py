@@ -1,9 +1,11 @@
 """File reader for CAP configuration files."""
 
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Sequence, Tuple, Union
 
 import yaml
+
+from ..domain.models.validation import ValidationIssue
 
 
 class FileReaderError(Exception):
@@ -20,7 +22,11 @@ class FileReaderError(Exception):
         super().__init__(self.message)
 
 
-def _collect_duplicate_keys(node: yaml.Node, path: List[str], duplicates: List[str]) -> None:
+def _collect_duplicate_keys(
+    node: yaml.Node,
+    path: List[str],
+    duplicates: List[ValidationIssue],
+) -> None:
     """Walk a YAML node tree and record paths with duplicate mapping keys."""
     if not isinstance(node, yaml.MappingNode):
         return
@@ -29,10 +35,47 @@ def _collect_duplicate_keys(node: yaml.Node, path: List[str], duplicates: List[s
     for key_node, value_node in node.value:
         key = str(key_node.value)
         if key in seen:
-            duplicates.append(".".join(path + [key]))
+            duplicates.append(
+                ValidationIssue(
+                    message=f"duplicate key: {'.'.join(path + [key])}",
+                    line=key_node.start_mark.line,
+                    column=key_node.start_mark.column,
+                )
+            )
         else:
             seen[key] = True
             _collect_duplicate_keys(value_node, path + [key], duplicates)
+
+
+def _resolve_node(root: yaml.Node, loc: Sequence[Union[str, int]]) -> Optional[yaml.Node]:
+    """
+    Walk a composed YAML node tree following a Pydantic error location tuple.
+
+    Returns the deepest node reachable along the path, or None.
+    """
+    current = root
+    for part in loc:
+        if isinstance(part, int):
+            # Sequence index
+            if isinstance(current, yaml.SequenceNode) and 0 <= part < len(current.value):
+                current = current.value[part]
+            else:
+                return current
+        else:
+            # Mapping key
+            key_str = str(part)
+            if isinstance(current, yaml.MappingNode):
+                found = False
+                for key_node, value_node in current.value:
+                    if str(key_node.value) == key_str:
+                        current = value_node
+                        found = True
+                        break
+                if not found:
+                    return current
+            else:
+                return current
+    return current
 
 
 class FileReader:
@@ -99,36 +142,70 @@ class FileReader:
         return None
 
     @staticmethod
-    def find_duplicate_keys(file_path: str) -> List[str]:
+    def compose_yaml(file_path: str) -> Optional[yaml.Node]:
         """
-        Find duplicate YAML mapping keys in a file.
+        Compose a YAML file into a node tree without resolving values.
 
-        YAML silently overwrites duplicate keys. This method detects them
-        by walking the raw node tree before values are merged.
+        Useful for inspecting structure with line/column information
+        before values are merged by safe_load.
 
         Args:
             file_path: Path to YAML file
 
         Returns:
-            List of dotted paths where duplicates were found, e.g.
-            ["api.public.cap_vscode", "api.internal.vscode_setup"]
+            Root YAML node, or None if parsing fails or file is empty
         """
         path = Path(file_path)
 
         if not path.exists():
-            return []
+            return None
 
         try:
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            root = yaml.compose(content, Loader=yaml.SafeLoader)
+            return yaml.compose(content, Loader=yaml.SafeLoader)
         except yaml.YAMLError:
-            return []
+            return None
 
-        if root is None:
-            return []
+    @staticmethod
+    def find_duplicate_keys(root: yaml.Node) -> List[ValidationIssue]:
+        """
+        Find duplicate YAML mapping keys in a composed node tree.
 
-        duplicates: List[str] = []
+        YAML silently overwrites duplicate keys. This method detects them
+        by walking the node tree before values are merged.
+
+        Args:
+            root: Composed YAML root node (from compose_yaml)
+
+        Returns:
+            List of ValidationIssue for each duplicate key found
+        """
+        duplicates: List[ValidationIssue] = []
         _collect_duplicate_keys(root, [], duplicates)
         return duplicates
+
+    @staticmethod
+    def resolve_yaml_line(root: yaml.Node, loc: Sequence[Union[str, int]]) -> Tuple[int, int]:
+        """
+        Resolve a Pydantic error location to a line and column in a YAML node tree.
+
+        Walks the composed node tree following the location path.
+        Returns the deepest reachable node's position.
+
+        Args:
+            root: Composed YAML root node (from compose_yaml)
+            loc: Pydantic error location tuple, e.g. ("dependencies", "python", 0, "name")
+
+        Returns:
+            (line, column) tuple, 0-indexed. Returns (0, 0) if resolution fails.
+        """
+        if not loc:
+            return (0, 0)
+
+        node = _resolve_node(root, loc)
+        if node is not None and node.start_mark is not None:
+            return (node.start_mark.line, node.start_mark.column)
+
+        return (0, 0)
