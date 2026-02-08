@@ -7,13 +7,14 @@ name = "cap-core"
 dynamic = ["version"]
 description = "CAP Core: Codebase-Awareness Protocol parsing library"
 
+readme = "../README.md"
 authors = [{name = "Domas Leščinskas", email = "domas.lescinskas@gmail.com"}]
 license = {text = "Apache-2.0"}
 
 keywords = ["ai", "mcp", "codebase", "documentation", "developer-tools", "parsing"]
 
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
 
     "Topic :: Software Development :: Libraries",

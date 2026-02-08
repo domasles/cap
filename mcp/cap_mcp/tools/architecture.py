@@ -15,7 +15,7 @@ def register(server: FastMCP, config_service: ConfigService, formatter: MCPForma
 
     @server.tool(
         name="get_architecture",
-        description="ALWAYS call this before planning any code changes. Returns the codebase's layer boundaries, module ownership, import restrictions, and architectural rules. Use this to understand WHERE code should be placed and what constraints apply. Essential context for any task involving adding, moving, or restructuring code.",
+        description="MUST call FIRST in any conversation about this codebase. Returns layer boundaries, module ownership, import restrictions, and architectural rules. Replaces reading source files for understanding project structure. Essential before adding, moving, or modifying any code.",
     )
     def get_architecture() -> dict:
         """Get codebase architecture including style, layers, modules, and rules."""

@@ -7,13 +7,14 @@ name = "cap-mcp"
 dynamic = ["version"]
 description = "CAP MCP: Model Context Protocol server for codebase awareness"
 
+readme = "../README.md"
 authors = [{name = "Domas Leščinskas", email = "domas.lescinskas@gmail.com"}]
 license = {text = "Apache-2.0"}
 
 keywords = ["ai", "mcp", "model-context-protocol", "codebase", "llm", "tools"]
 
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
 
     "Topic :: Software Development :: Libraries",
@@ -32,7 +33,7 @@ classifiers = [
 
 requires-python = ">=3.11"
 dependencies = [
-    "cap-core==0.1.0",
+    "cap-core==1.0.0",
     "mcp[cli]>=1.26.0",
 ]
 

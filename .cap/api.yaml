@@ -12,28 +12,28 @@ api:
         - "WorkspaceValidation"
         - "MCPFormatter"
         - "__version__"
-      stability: "experimental"
+      stability: "stable"
 
     cap_mcp:
       location: "mcp/cap_mcp/__init__.py"
       exports:
         - "create_server"
         - "__version__"
-      stability: "experimental"
+      stability: "stable"
 
     cap_cli:
       location: "shells/cli/cap_cli/main.py"
       exports:
         - "cli"
         - "main"
-      stability: "experimental"
+      stability: "stable"
 
     cap_vscode:
       location: "shells/vscode/src/extension.ts"
       exports:
         - "activate"
         - "deactivate"
-      stability: "experimental"
+      stability: "stable"
 
   internal:
     domain_models:
@@ -55,7 +55,7 @@ api:
         - "ValidationIssue"
         - "ValidationResult"
         - "WorkspaceValidation"
-      stability: "experimental"
+      stability: "stable"
       warning: "Use through ConfigService - do not import models directly unless extending CAP"
 
     infrastructure:
@@ -63,7 +63,7 @@ api:
       exports:
         - "FileReader"
         - "FileReaderError"
-      stability: "experimental"
+      stability: "stable"
       warning: "Internal to cap-core - use ConfigService instead of FileReader directly"
 
     mcp_tools:
@@ -72,7 +72,7 @@ api:
         - "dependencies.register"
         - "architecture.register"
         - "api.register"
-      stability: "experimental"
+      stability: "stable"
       warning: "Internal to cap-mcp - tool registration happens in server.py"
 
     cli_utils:
@@ -85,7 +85,7 @@ api:
         - "print_error"
         - "print_warning"
         - "print_info"
-      stability: "experimental"
+      stability: "stable"
       warning: "Internal to cap-cli"
 
     vscode_setup:
@@ -94,7 +94,7 @@ api:
         - "findPython"
         - "setupEnvironment"
         - "checkForUpdate"
-      stability: "experimental"
+      stability: "stable"
       warning: "Internal to cap-vscode"
 
     vscode_utils:
@@ -104,7 +104,7 @@ api:
         - "getCapExecutable"
         - "getVenvPython"
         - "createCapDirectoryWatcher"
-      stability: "experimental"
+      stability: "stable"
       warning: "Internal to cap-vscode"
 
 rules:

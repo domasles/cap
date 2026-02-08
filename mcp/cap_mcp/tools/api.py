@@ -15,7 +15,7 @@ def register(server: FastMCP, config_service: ConfigService, formatter: MCPForma
 
     @server.tool(
         name="get_api",
-        description="Call this before reading source files to understand the codebase surface. Returns all public and internal exports, their file locations, stability markers, and access rules. Use this to understand WHAT exists and how components connect before diving into implementation details.",
+        description="ALWAYS call BEFORE reading source files. Returns all public and internal exports with file locations, stability markers, and access rules. Provides the full codebase surface faster than scanning files.",
     )
     def get_api() -> dict:
         """Get public and internal API exports with usage rules."""

@@ -5,6 +5,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python: ≥3.11](https://img.shields.io/badge/python-≥3.11-3776ab.svg)](https://python.org)
+[![Node.js: ≥20](https://img.shields.io/badge/node.js-≥20-339933.svg)](https://nodejs.org)
+[![VS Code: ≥1.109.0](https://img.shields.io/badge/vscode-≥1.109.0-007acc.svg)](https://code.visualstudio.com/)
 
 > Give AI coding agents the context they need - architecture, dependencies, and API - so they stop guessing and start respecting your codebase.
 
@@ -251,9 +253,10 @@ cap/
 
 ### Prerequisites
 
-- Python ≥ 3.11
-- Node.js ≥ 20 (for the VS Code extension)
-- Git
+- **Python** ≥ 3.11
+- **Node.js** ≥ 20 (VS Code extension only)
+- **VS Code** ≥ 1.109.0 (VS Code extension only)
+- **Git** (for version control integration)
 
 ### Setup
 

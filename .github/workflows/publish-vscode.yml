@@ -30,5 +30,8 @@ jobs:
       - name: Build extension
         run: npm run build
 
+      - name: Copy README
+        run: cp ../../README.md .
+
       - name: Publish to VS Code Marketplace
         run: npx @vscode/vsce publish --no-dependencies -p ${{ secrets.VSCE_PAT }}
