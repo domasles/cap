@@ -1,7 +1,7 @@
 """Validation domain models - pure data structures for validation results."""
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 
 @dataclass
@@ -9,8 +9,8 @@ class ValidationIssue:
     """A single validation issue with location information."""
 
     message: str
-    line: int = 0
-    column: int = 0
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 
 @dataclass

@@ -40,4 +40,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   output.appendLine("CAP activated.");
 }
 
-export function deactivate(): void {}
+export function deactivate(): void {
+  if (output) {
+    output.dispose();
+  }
+}

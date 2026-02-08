@@ -74,7 +74,6 @@
     "vscode:prepublish": "npm run build",
     "build": "node esbuild.config.mjs --production",
     "watch": "node esbuild.config.mjs --watch",
-    "lint": "eslint src/",
     "package": "vsce package"
   },
   "devDependencies": {

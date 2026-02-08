@@ -46,8 +46,8 @@ export async function runCap(
 
 export interface ValidationErrorItem {
   message: string;
-  line: number;
-  column: number;
+  line: number | null;
+  column: number | null;
 }
 
 export interface ValidationFileResult {
@@ -59,9 +59,15 @@ export interface ValidationFileResult {
 export async function runValidateJson(
   env: Environment,
   workspacePath: string,
-  output?: OutputChannel
+  output?: OutputChannel,
+  file?: string
 ): Promise<ValidationFileResult[]> {
-  const result = await runCap(env, ["validate", "--json", workspacePath], workspacePath, output);
+  const args = ["validate", "--json"];
+  if (file) {
+    args.push("-f", file);
+  }
+  args.push(workspacePath);
+  const result = await runCap(env, args, workspacePath, output);
   try {
     return JSON.parse(result.stdout.trim());
   } catch {

@@ -6,7 +6,7 @@ from cap_core import ConfigService
 from cap_core.application import MCPFormatter
 
 
-def register(server: FastMCP, config_service: ConfigService) -> None:
+def register(server: FastMCP, config_service: ConfigService, formatter: MCPFormatter) -> None:
     """Register the get_api tool on the server."""
 
     @server.tool(
@@ -24,7 +24,6 @@ def register(server: FastMCP, config_service: ConfigService) -> None:
                     "hint": "Create a .cap/api.yaml file in your workspace",
                 }
 
-            formatter = MCPFormatter()
             return formatter.format_api(api)
 
         except Exception as e:

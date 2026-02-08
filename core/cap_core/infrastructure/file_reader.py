@@ -115,7 +115,7 @@ class FileReader:
         except yaml.YAMLError as e:
             raise FileReaderError(f"YAML parsing error in {file_path}: {e}")
 
-        except Exception as e:
+        except OSError as e:
             raise FileReaderError(f"Error reading {file_path}: {e}")
 
     @staticmethod
@@ -187,7 +187,7 @@ class FileReader:
         return duplicates
 
     @staticmethod
-    def resolve_yaml_line(root: yaml.Node, loc: Sequence[Union[str, int]]) -> Tuple[int, int]:
+    def resolve_yaml_line(root: yaml.Node, loc: Sequence[Union[str, int]]) -> Tuple[Optional[int], Optional[int]]:
         """
         Resolve a Pydantic error location to a line and column in a YAML node tree.
 
@@ -199,13 +199,13 @@ class FileReader:
             loc: Pydantic error location tuple, e.g. ("dependencies", "python", 0, "name")
 
         Returns:
-            (line, column) tuple, 0-indexed. Returns (0, 0) if resolution fails.
+            (line, column) tuple, 0-indexed. Returns (None, None) if resolution fails.
         """
         if not loc:
-            return (0, 0)
+            return (None, None)
 
         node = _resolve_node(root, loc)
         if node is not None and node.start_mark is not None:
             return (node.start_mark.line, node.start_mark.column)
 
-        return (0, 0)
+        return (None, None)

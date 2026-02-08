@@ -10,7 +10,15 @@ from ..utils import get_workspace, validate_workspace, console, print_success, p
 @click.command()
 @click.argument("workspace", type=click.Path(exists=True), default=".", required=False)
 @click.option("--json", "json_output", is_flag=True, help="Output results as JSON for programmatic use")
-def validate(workspace, json_output):
+@click.option(
+    "--file",
+    "-f",
+    "file_filter",
+    multiple=True,
+    type=click.Choice(["dependencies", "architecture", "api"], case_sensitive=False),
+    help="Validate only specific file(s). Can be used multiple times.",
+)
+def validate(workspace, json_output, file_filter):
     """
     Validate .cap/ configuration files in a workspace.
 
@@ -19,9 +27,11 @@ def validate(workspace, json_output):
     Checks each YAML file for correct structure and valid values.
 
     Example:
-        cap validate                    # Validate current directory
-        cap validate /path/to/project   # Validate specific project
-        cap validate --json             # Output as JSON
+        cap validate                         # Validate current directory
+        cap validate /path/to/project        # Validate specific project
+        cap validate --json                  # Output as JSON
+        cap validate -f dependencies         # Validate only dependencies.yaml
+        cap validate -f dependencies -f api  # Validate two files
     """
     workspace_path = get_workspace(workspace)
 
@@ -45,7 +55,7 @@ def validate(workspace, json_output):
 
     config_service = ConfigService(str(workspace_path))
     validation_service = ValidationService(config_service)
-    result = validation_service.validate_all()
+    result = validation_service.validate_all(files=list(file_filter) if file_filter else None)
 
     if json_output:
         output = [
@@ -73,7 +83,7 @@ def validate(workspace, json_output):
             has_errors = True
             print_error(f"{file_result.file}")
             for err in file_result.errors:
-                line_info = f"Line {err.line + 1}, column {err.column + 1}" if err.line >= 0 else ""
+                line_info = f"Line {err.line + 1}, column {err.column + 1}" if err.line is not None else ""
                 prefix = f"  {line_info}: " if line_info else "  "
                 console.print(f"{prefix}{err.message}", style="dim")
 

@@ -51,7 +51,7 @@ def init(workspace, force, minimal):
     if minimal:
         console.print("\n[OK] Minimal initialization complete\n", style="bold green")
         console.print(f"Next steps:", style="bold")
-        console.print("  1. Add your configuration files to {cap_dir}/", style="dim")
+        console.print(f"  1. Add your configuration files to {cap_dir}/", style="dim")
         console.print("  2. Run 'cap validate' to check your configuration\n", style="dim")
         sys.exit(0)
 

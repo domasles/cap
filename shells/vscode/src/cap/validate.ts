@@ -59,11 +59,17 @@ export function registerValidation(
     if (existing) {
       clearTimeout(existing);
     }
+
+    // Extract config name from filename (e.g. "dependencies" from "dependencies.yaml")
+    const basename = path.basename(uri.fsPath, ".yaml");
+    const validNames = ["dependencies", "architecture", "api"];
+    const file = validNames.includes(basename) ? basename : undefined;
+
     timers.set(
       key,
       setTimeout(async () => {
         timers.delete(key);
-        const results = await runValidateJson(env, folder.uri.fsPath, output);
+        const results = await runValidateJson(env, folder.uri.fsPath, output, file);
         updateDiagnostics(folder.uri.fsPath, results, diagnostics);
       }, 500)
     );
@@ -99,12 +105,11 @@ function updateDiagnostics(
 ): void {
   const capDir = path.join(workspacePath, CAP_DIR_NAME);
 
-  // Clear previous diagnostics for this workspace's .cap/ files
-  diagnostics.forEach((uri) => {
-    if (uri.fsPath.startsWith(capDir)) {
-      diagnostics.delete(uri);
-    }
-  });
+  // Only clear diagnostics for files present in the results
+  for (const result of results) {
+    const fileUri = vscode.Uri.file(path.join(capDir, result.file));
+    diagnostics.delete(fileUri);
+  }
 
   for (const result of results) {
     const fileUri = vscode.Uri.file(path.join(capDir, result.file));
@@ -112,8 +117,9 @@ function updateDiagnostics(
       const items = result.errors.map((err) => {
         const line = err.line ?? 0;
         const col = err.column ?? 0;
+        const endCol = err.line !== null ? Number.MAX_SAFE_INTEGER : 0;
         const d = new vscode.Diagnostic(
-          new vscode.Range(line, col, line, Number.MAX_SAFE_INTEGER),
+          new vscode.Range(line, col, line, endCol),
           err.message,
           vscode.DiagnosticSeverity.Error
         );

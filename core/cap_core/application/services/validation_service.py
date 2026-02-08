@@ -21,9 +21,13 @@ class ValidationService:
         """
         self.config_service = config_service
 
-    def validate_all(self) -> WorkspaceValidation:
+    def validate_all(self, files: Optional[list[str]] = None) -> WorkspaceValidation:
         """
-        Validate all CAP configuration files in the workspace.
+        Validate CAP configuration files in the workspace.
+
+        Args:
+            files: Optional list of config names to validate (e.g. ["dependencies", "api"]).
+                   If None, validates all found files.
 
         Returns:
             WorkspaceValidation with per-file results
@@ -45,6 +49,11 @@ class ValidationService:
             "api.yaml": self.config_service.load_api,
         }
 
+        # Filter to requested files if specified
+        if files:
+            requested = {f"{name}.yaml" for name in files}
+            loaders = {k: v for k, v in loaders.items() if k in requested}
+
         for filename, loader in loaders.items():
             file_path = cap_dir / filename
 
@@ -62,9 +71,10 @@ class ValidationService:
             except ValidationError as e:
                 for err in e.errors():
                     loc = ".".join(str(part) for part in err["loc"])
-                    line, col = (0, 0)
+                    line, col = None, None
                     if root is not None:
-                        line, col = self.config_service.file_reader.resolve_yaml_line(root, err["loc"])
+                        resolved = self.config_service.file_reader.resolve_yaml_line(root, err["loc"])
+                        line, col = resolved
                     errors.append(
                         ValidationIssue(
                             message=f"{loc}: {err['msg']}",

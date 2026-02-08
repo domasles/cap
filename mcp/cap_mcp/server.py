@@ -3,6 +3,7 @@
 from mcp.server.fastmcp import FastMCP
 
 from cap_core import ConfigService
+from cap_core.application import MCPFormatter
 
 from .tools import dependencies, architecture, api
 
@@ -19,9 +20,10 @@ def create_server(workspace_path: str) -> FastMCP:
     """
     server = FastMCP("cap-mcp")
     config_service = ConfigService(workspace_path)
+    formatter = MCPFormatter()
 
-    dependencies.register(server, config_service)
-    architecture.register(server, config_service)
-    api.register(server, config_service)
+    dependencies.register(server, config_service, formatter)
+    architecture.register(server, config_service, formatter)
+    api.register(server, config_service, formatter)
 
     return server
