@@ -2,7 +2,7 @@
   "name": "cap-vscode",
   "displayName": "CAP - Codebase Awareness Protocol",
   "description": "Automatic MCP server for AI coding agents to understand your codebase architecture, dependencies, and API",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "domasles",
   "license": "Apache-2.0",
   "qna": "https://github.com/domasles/cap/issues",
