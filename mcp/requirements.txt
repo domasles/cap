@@ -2,7 +2,7 @@
 mcp[cli]>=1.26.0
 
 # Core dependencies
-cap_core==1.1.0
+cap_core==1.1.2
 
 # Build dependencies
 setuptools>=80.10.2
