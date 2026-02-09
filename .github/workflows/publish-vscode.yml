@@ -1,8 +1,7 @@
 name: Publish VS Code Extension
 
 on:
-  release:
-    types: [ published ]
+  workflow_dispatch:
 
 jobs:
   publish-vscode:
@@ -19,13 +18,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get Release Tag
+        id: vars
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=$(gh release view --json tagName --template '{{.tagName}}')" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build extension
         run: npm run build
@@ -36,15 +47,17 @@ jobs:
           cp ../../LICENSE .
 
       - name: Package .vsix
-        run: npx @vscode/vsce package --no-dependencies --no-prepublish -o cap-vscode-${{ github.event.release.tag_name }}.vsix
+        run: npx @vscode/vsce package --no-dependencies -o cap-vscode-${{ steps.vars.outputs.tag }}.vsix
 
       - name: Upload .vsix to release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload ${{ github.event.release.tag_name }} cap-vscode-${{ github.event.release.tag_name }}.vsix
+        run: gh release upload ${{ steps.vars.outputs.tag }} cap-vscode-${{ steps.vars.outputs.tag }}.vsix --clobber
 
       - name: Publish to VS Code Marketplace
-        run: npx @vscode/vsce publish --no-dependencies --no-prepublish -p ${{ secrets.VSCE_PAT }}
+        continue-on-error: true
+        run: npx @vscode/vsce publish --no-dependencies -p ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Open VSX
-        run: npx ovsx publish cap-vscode-${{ github.event.release.tag_name }}.vsix -p ${{ secrets.OVSX_PAT }}
+        continue-on-error: true
+        run: npx ovsx publish cap-vscode-${{ steps.vars.outputs.tag }}.vsix -p ${{ secrets.OVSX_PAT }}

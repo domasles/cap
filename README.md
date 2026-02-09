@@ -1,4 +1,4 @@
-![CAP Logo](./CAPLogo.svg)
+![CAP Logo](./CAPLogo.png)
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-dc143c.svg)](LICENSE)
