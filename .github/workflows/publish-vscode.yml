@@ -36,7 +36,7 @@ jobs:
           cp ../../LICENSE .
 
       - name: Package .vsix
-        run: npx @vscode/vsce package --no-dependencies -o cap-vscode-${{ github.event.release.tag_name }}.vsix
+        run: npx @vscode/vsce package --no-dependencies --no-prepublish -o cap-vscode-${{ github.event.release.tag_name }}.vsix
 
       - name: Upload .vsix to release
         env:
@@ -44,4 +44,7 @@ jobs:
         run: gh release upload ${{ github.event.release.tag_name }} cap-vscode-${{ github.event.release.tag_name }}.vsix
 
       - name: Publish to VS Code Marketplace
-        run: npx @vscode/vsce publish --no-dependencies -p ${{ secrets.VSCE_PAT }}
+        run: npx @vscode/vsce publish --no-dependencies --no-prepublish -p ${{ secrets.VSCE_PAT }}
+
+      - name: Publish to Open VSX
+        run: npx ovsx publish cap-vscode-${{ github.event.release.tag_name }}.vsix -p ${{ secrets.OVSX_PAT }}

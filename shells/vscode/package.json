@@ -1,9 +1,10 @@
 {
   "name": "cap-vscode",
-  "displayName": "CAP - Codebase Awareness Protocol",
+  "displayName": "CAP - Codebase Awareness Protocol (VSCode)",
   "description": "Automatic MCP server for AI coding agents to understand your codebase architecture, dependencies, and API",
   "version": "1.0.1",
   "publisher": "domasles",
+  "icon": "assets/CAPLogo.png",
   "license": "Apache-2.0",
   "qna": "https://github.com/domasles/cap/issues",
   "repository": {
@@ -79,6 +80,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.109.0",
+    "ovsx": "^0.10.9",
     "esbuild": "^0.27.3",
     "typescript": "^5.9.3"
   }

@@ -1,12 +1,12 @@
-# CAP
-
-**Codebase Awareness Protocol**
+![CAP Logo](./CAPLogo.svg)
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-dc143c.svg)](LICENSE)
 [![Python: ≥3.11](https://img.shields.io/badge/python-≥3.11-3776ab.svg)](https://python.org)
 [![Node.js: ≥20](https://img.shields.io/badge/node.js-≥20-339933.svg)](https://nodejs.org)
 [![VS Code: ≥1.109.0](https://img.shields.io/badge/vscode-≥1.109.0-007acc.svg)](https://code.visualstudio.com/)
+
+# CAP - Codebase Awareness Protocol
 
 > Give AI coding agents the context they need - architecture, dependencies, and API - so they stop guessing and start respecting your codebase.
 
