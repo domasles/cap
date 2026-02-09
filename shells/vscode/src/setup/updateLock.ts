@@ -25,28 +25,35 @@ function lockPath(venvDir: string): string {
 
 export function acquireUpdateLock(venvDir: string): boolean {
   const file = lockPath(venvDir);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
 
-  if (fs.existsSync(file)) {
-    // Check for stale lock
-    try {
-      const content = fs.readFileSync(file, "utf-8");
-      const timestamp = parseInt(content, 10);
-      if (!isNaN(timestamp) && Date.now() - timestamp > STALE_TIMEOUT_MS) {
-        // Stale lock - take over
-        fs.writeFileSync(file, Date.now().toString());
-        return true;
-      }
-    } catch {
-      // Malformed lock file - take over
+  // Try atomic exclusive create
+  try {
+    fs.writeFileSync(file, Date.now().toString(), { flag: "wx" });
+    return true;
+  } catch {
+    // File already exists - check if stale
+  }
+
+  try {
+    const content = fs.readFileSync(file, "utf-8");
+    const timestamp = parseInt(content, 10);
+    if (!isNaN(timestamp) && Date.now() - timestamp > STALE_TIMEOUT_MS) {
+      // Stale lock - take over
       fs.writeFileSync(file, Date.now().toString());
       return true;
     }
-    return false;
+  } catch {
+    // Malformed or deleted between checks - try to take over
+    try {
+      fs.writeFileSync(file, Date.now().toString(), { flag: "wx" });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, Date.now().toString());
-  return true;
+  return false;
 }
 
 export function releaseUpdateLock(venvDir: string): void {
@@ -88,7 +95,8 @@ export function watchUpdateLock(venvDir: string): UpdateLockWatcher {
   fs.mkdirSync(venvDir, { recursive: true });
 
   const watcher = fs.watch(venvDir, (eventType, filename) => {
-    if (filename !== UPDATE_LOCK_FILE) {
+    // filename can be null on some platforms - fall back to checking the lock path directly
+    if (filename !== null && filename !== UPDATE_LOCK_FILE) {
       return;
     }
 
@@ -104,6 +112,11 @@ export function watchUpdateLock(venvDir: string): UpdateLockWatcher {
         cb();
       }
     }
+  });
+
+  watcher.on("error", () => {
+    // Directory was deleted or became inaccessible - silently stop watching
+    watcher.close();
   });
 
   return {

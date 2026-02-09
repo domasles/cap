@@ -12,8 +12,9 @@ import type { Environment } from "../setup/environment";
 import type { FileSystemWatcher } from "../utils/fileSystemWatcher";
 
 export interface McpProviderHandle {
+  pause: () => void;
+  resume: () => void;
   dispose: () => void;
-  reregister: () => void;
 }
 
 export function registerMcpProvider(
@@ -72,16 +73,19 @@ export function registerMcpProvider(
   );
 
   return {
+    pause: () => {
+      unregister();
+    },
+    resume: () => {
+      register();
+      onDidChange.fire();
+    },
     dispose: () => {
       unregister();
       foldersWatcher.dispose();
       createSub.dispose();
       deleteSub.dispose();
       onDidChange.dispose();
-    },
-    reregister: () => {
-      register();
-      onDidChange.fire();
     },
   };
 }

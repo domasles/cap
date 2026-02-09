@@ -1,7 +1,6 @@
 """Compatibility command - Report version compatibility information."""
 
 import json
-import sys
 import click
 
 from ..meta import __version__
@@ -11,7 +10,8 @@ from ..utils import console, print_info
 
 @click.command()
 @click.option("--json", "json_output", is_flag=True, help="Output results as JSON for programmatic use")
-def compatibility(json_output):
+@click.pass_context
+def compatibility(ctx, json_output):
     """
     Show version compatibility information.
 
@@ -28,16 +28,17 @@ def compatibility(json_output):
     }
 
     if json_output:
-        print(json.dumps(data, indent=2))
-        sys.exit(0)
+        click.echo(json.dumps(data, indent=2))
+        ctx.exit(0)
 
     console.print(f"\n[bold]CAP CLI {__version__}[/bold]\n")
 
     if not COMPATIBLE_PLUGINS:
         print_info("No compatible plugins defined.")
-        return
+        ctx.exit(0)
 
     console.print("[bold]Compatible plugins:[/bold]")
+
     for plugin, versions in COMPATIBLE_PLUGINS.items():
         versions_str = ", ".join(versions)
         console.print(f"  {plugin}: {versions_str}")

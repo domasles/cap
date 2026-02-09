@@ -1,5 +1,5 @@
 export function parseSemver(version: string): [number, number, number] {
-  const parts = version.split(".").map(Number);
+  const parts = version.split(".").map((p) => parseInt(p, 10) || 0);
   return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
 }
 

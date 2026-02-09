@@ -1,7 +1,6 @@
 """Validate command - Check .cap/ configuration files."""
 
 import json
-import sys
 import click
 
 from ..utils import get_workspace, validate_workspace, console, print_success, print_error, print_info
@@ -18,7 +17,8 @@ from ..utils import get_workspace, validate_workspace, console, print_success, p
     type=click.Choice(["dependencies", "architecture", "api"], case_sensitive=False),
     help="Validate only specific file(s). Can be used multiple times.",
 )
-def validate(workspace, json_output, file_filter):
+@click.pass_context
+def validate(ctx, workspace, json_output, file_filter):
     """
     Validate .cap/ configuration files in a workspace.
 
@@ -38,20 +38,20 @@ def validate(workspace, json_output, file_filter):
     is_valid, error_msg = validate_workspace(workspace_path)
     if not is_valid:
         if json_output:
-            print(json.dumps({"error": error_msg, "results": []}))
-            sys.exit(1)
+            click.echo(json.dumps({"error": error_msg, "results": []}))
+            ctx.exit(1)
         print_error(error_msg)
         console.print(f"\nRun 'cap init' in {workspace_path} to create .cap/ directory.", style="yellow")
-        sys.exit(1)
+        ctx.exit(1)
 
     try:
         from cap_core import ConfigService, ValidationService
     except ImportError:
         if json_output:
-            print(json.dumps({"error": "cap_core package not found", "results": []}))
-            sys.exit(1)
+            click.echo(json.dumps({"error": "cap_core package not found", "results": []}))
+            ctx.exit(1)
         print_error("cap_core package not found. Install with: pip install cap_core")
-        sys.exit(1)
+        ctx.exit(1)
 
     config_service = ConfigService(str(workspace_path))
     validation_service = ValidationService(config_service)
@@ -66,13 +66,13 @@ def validate(workspace, json_output, file_filter):
             }
             for r in result.results
         ]
-        print(json.dumps(output))
-        sys.exit(0 if result.all_valid else 1)
+        click.echo(json.dumps(output))
+        ctx.exit(0 if result.all_valid else 1)
 
     if not result.results:
         print_info("No configuration files found in .cap/ directory.")
         console.print("Run 'cap init' to create template files.", style="dim")
-        sys.exit(0)
+        ctx.exit(0)
 
     has_errors = False
 
@@ -98,6 +98,6 @@ def validate(workspace, json_output, file_filter):
     console.print()
     if has_errors:
         console.print(f"{valid_count}/{total_count} files valid", style="bold yellow")
-        sys.exit(1)
+        ctx.exit(1)
     else:
         console.print(f"All {total_count} files valid", style="bold green")

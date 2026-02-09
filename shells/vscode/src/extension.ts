@@ -5,7 +5,7 @@ import { OUTPUT_CHANNEL_NAME, VENV_DIR_NAME } from "./constants";
 import { setupEnvironment } from "./setup/environment";
 import { checkForUpdate } from "./setup/updater";
 import { checkCompatibility } from "./setup/compatibility";
-import { watchUpdateLock, isUpdateLocked } from "./setup/updateLock";
+import { watchUpdateLock, isUpdateLocked, releaseUpdateLock } from "./setup/updateLock";
 import { createCapDirectoryWatcher } from "./utils/fileSystemWatcher";
 import { registerMcpProvider } from "./mcp/provider";
 import { registerMcpNotice } from "./mcp/notice";
@@ -13,6 +13,7 @@ import { registerInitCommands, promptInitForWorkspaces } from "./cap/init";
 import { registerValidation } from "./cap/validate";
 
 let output: vscode.OutputChannel;
+let activeVenvDir: string | undefined;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   output = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
@@ -29,7 +30,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     return;
   }
 
-  // Check for CLI updates first (blocking) — user may need the latest CLI for compat
+  // Check for CLI updates first (blocking) - user may need the latest CLI for compat
   await checkForUpdate(context, env.capPath, output);
 
   // Check CLI and extension version compatibility (runs after any update)
@@ -47,20 +48,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   // Watch for cross-window update lock
   const venvDir = path.join(context.globalStorageUri.fsPath, VENV_DIR_NAME);
+  activeVenvDir = venvDir;
 
   if (isUpdateLocked(venvDir)) {
     output.appendLine("Update in progress in another window - MCP servers paused.");
-    mcpProvider.dispose();
+    mcpProvider.pause();
   }
 
   const lockWatcher = watchUpdateLock(venvDir);
   lockWatcher.onLocked(() => {
     output.appendLine("Update lock acquired by another window - pausing MCP servers.");
-    mcpProvider.dispose();
+    mcpProvider.pause();
   });
   lockWatcher.onUnlocked(() => {
     output.appendLine("Update lock released - restarting MCP servers.");
-    mcpProvider.reregister();
+    mcpProvider.resume();
   });
   context.subscriptions.push({ dispose: () => lockWatcher.dispose() });
 
@@ -74,6 +76,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 }
 
 export function deactivate(): void {
+  // Release update lock if this window was mid-update
+  if (activeVenvDir) {
+    releaseUpdateLock(activeVenvDir);
+  }
   if (output) {
     output.dispose();
   }

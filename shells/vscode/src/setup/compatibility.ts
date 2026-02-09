@@ -46,11 +46,12 @@ export async function checkCompatibility(
       timeout: 5000,
     });
     info = JSON.parse(stdout.trim());
-  } catch {
-    // CLI too old to have the compatibility command - warn but allow
-    output.appendLine("CAP CLI does not support compatibility check. Update recommended.");
+  } catch (err: any) {
+    // CLI too old (no compatibility command), timeout, JSON parse error, etc.
+    const message = err?.message ?? "unknown error";
+    output.appendLine(`Compatibility check failed: ${message}. Allowing activation.`);
     await vscode.window.showWarningMessage(
-      "CAP: Installed CLI does not support compatibility checks. Consider updating CAP packages.",
+      "CAP: Could not verify CLI compatibility. Consider updating CAP packages.",
       "Understood"
     );
     return true;

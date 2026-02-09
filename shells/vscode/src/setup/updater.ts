@@ -84,10 +84,13 @@ function getLatestPyPIVersion(): Promise<string | undefined> {
   });
 }
 
+const MAX_RETRY_ATTEMPTS = 3;
+
 export async function runUpdate(
   context: vscode.ExtensionContext,
   output: vscode.OutputChannel,
-  mcpProvider?: McpProviderHandle
+  mcpProvider?: McpProviderHandle,
+  attempt: number = 1
 ): Promise<boolean> {
   const venvDir = path.join(context.globalStorageUri.fsPath, VENV_DIR_NAME);
   const venvPython = getVenvPython(venvDir);
@@ -99,7 +102,7 @@ export async function runUpdate(
   }
 
   // Pause MCP servers so pip can replace files
-  mcpProvider?.dispose();
+  mcpProvider?.pause();
   output.appendLine("MCP servers paused for update.");
 
   // Brief delay to let other windows react to the lock file
@@ -113,33 +116,30 @@ export async function runUpdate(
 
     // Release lock and restart MCP servers
     releaseUpdateLock(venvDir);
-    mcpProvider?.reregister();
-    output.appendLine("MCP servers restarted after update.");
+    mcpProvider?.resume();
+    output.appendLine("CAP updated successfully. MCP servers restarted.");
 
-    vscode.window
-      .showInformationMessage(
-        "CAP updated successfully. Reload the window to apply.",
-        "Reload"
-      )
-      .then((choice) => {
-        if (choice === "Reload") {
-          vscode.commands.executeCommand("workbench.action.reloadWindow");
-        }
-      });
+    vscode.window.showInformationMessage("CAP updated successfully. MCP servers restarted.");
 
     return true;
   } catch (err: any) {
     // Release lock even on failure
     releaseUpdateLock(venvDir);
-    mcpProvider?.reregister();
+    mcpProvider?.resume();
 
-    const choice = await vscode.window.showErrorMessage(
-      `CAP: Update failed. ${err.message}`,
-      "Retry"
-    );
+    if (attempt < MAX_RETRY_ATTEMPTS) {
+      const choice = await vscode.window.showErrorMessage(
+        `CAP: Update failed. ${err.message}`,
+        "Retry"
+      );
 
-    if (choice === "Retry") {
-      return await runUpdate(context, output, mcpProvider);
+      if (choice === "Retry") {
+        return await runUpdate(context, output, mcpProvider, attempt + 1);
+      }
+    } else {
+      vscode.window.showErrorMessage(
+        `CAP: Update failed after ${MAX_RETRY_ATTEMPTS} attempts. ${err.message}`
+      );
     }
 
     return false;
