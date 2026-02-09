@@ -94,6 +94,12 @@ api:
         - "findPython"
         - "setupEnvironment"
         - "checkForUpdate"
+        - "runUpdate"
+        - "checkCompatibility"
+        - "acquireUpdateLock"
+        - "releaseUpdateLock"
+        - "isUpdateLocked"
+        - "watchUpdateLock"
       stability: "stable"
       warning: "Internal to cap-vscode"
 
@@ -104,6 +110,9 @@ api:
         - "getCapExecutable"
         - "getVenvPython"
         - "createCapDirectoryWatcher"
+        - "parseSemver"
+        - "isNewer"
+        - "maxVersion"
       stability: "stable"
       warning: "Internal to cap-vscode"
 
@@ -122,3 +131,5 @@ notes:
   - "create_server() is the composition root for the MCP server"
   - "Config domain models (DependenciesYAML, ArchitectureYAML, ApiYAML) are Pydantic BaseModel subclasses - use model_validate() and model_dump()"
   - "Validation domain models (ValidationIssue, ValidationResult, WorkspaceValidation) are stdlib dataclasses - pure data, no Pydantic dependency"
+  - "COMPATIBLE_PLUGINS in config.py is the single source of truth for CLI-to-plugin version compatibility"
+  - "McpProviderHandle exposes dispose()/reregister() for pausing and resuming MCP servers during updates"

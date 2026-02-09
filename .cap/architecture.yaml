@@ -47,11 +47,11 @@ modules:
 
   cap_cli:
     owns: "shells/cli/cap_cli/**"
-    purpose: "CLI shell - provides cap init, cap serve, and cap validate commands"
+    purpose: "CLI shell - provides cap init, cap serve, cap validate, and cap compatibility commands. Defines version compatibility matrix in config.py."
 
   cap_vscode:
     owns: "shells/vscode/src/**"
-    purpose: "VS Code extension - discovers Python, manages isolated venv, registers MCP server provider, runs cap CLI as subprocess"
+    purpose: "VS Code extension - discovers Python, manages isolated venv, registers MCP server provider, runs cap CLI as subprocess. Checks CLI compatibility, coordinates cross-window pip updates via file-based lock."
 
 rules:
   forbid:
@@ -90,3 +90,6 @@ notes:
   - "server.py is the composition root for the MCP server - wires ConfigService into tools"
   - "Each MCP tool is in its own file with a register() function that closes over ConfigService"
   - "The VS Code extension uses vscode.lm.registerMcpServerDefinitionProvider for agent discovery"
+  - "McpProviderHandle supports dispose()/reregister() for pausing MCP servers during pip updates"
+  - "Cross-window update coordination uses a file-based lock (.cap-updating) in the shared venv directory"
+  - "cap compatibility --json is the protocol for CLI-to-extension version compatibility checking"
