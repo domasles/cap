@@ -6,41 +6,46 @@ import * as https from "https";
 
 import { CAP_CLI_PACKAGE, VENV_DIR_NAME } from "../constants";
 import { getVenvPython } from "../utils/venv";
+import { isNewer } from "../utils/version";
+import { acquireUpdateLock, releaseUpdateLock } from "./updateLock";
+import type { McpProviderHandle } from "../mcp/provider";
 
 const execFileAsync = promisify(execFile);
 
 export async function checkForUpdate(
   context: vscode.ExtensionContext,
   capPath: string,
-  output: vscode.OutputChannel
-): Promise<void> {
+  output: vscode.OutputChannel,
+  mcpProvider?: McpProviderHandle
+): Promise<boolean> {
   if (context.extensionMode === vscode.ExtensionMode.Development) {
-    return;
+    return false;
   }
 
   try {
     const installed = await getInstalledVersion(capPath);
     const latest = await getLatestPyPIVersion();
     if (!installed || !latest || installed === latest) {
-      return;
+      return false;
     }
     if (!isNewer(latest, installed)) {
-      return;
+      return false;
     }
 
-    output.appendLine(`CAP update available: ${installed} → ${latest}`);
+    output.appendLine(`CAP update available: ${installed} -> ${latest}`);
     const choice = await vscode.window.showInformationMessage(
-      `CAP v${latest} is available (installed: v${installed}). Update now?`,
+      `CAP ${latest} is available (installed: ${installed}). Update now?`,
       "Update",
       "Later"
     );
 
     if (choice === "Update") {
-      await runUpdate(context, output);
+      return await runUpdate(context, output, mcpProvider);
     }
   } catch {
-    // silently ignore update check failures
+    // Silently ignore update check failures
   }
+  return false;
 }
 
 async function getInstalledVersion(capPath: string): Promise<string | undefined> {
@@ -79,38 +84,64 @@ function getLatestPyPIVersion(): Promise<string | undefined> {
   });
 }
 
-function isNewer(latest: string, installed: string): boolean {
-  const l = latest.split(".").map(Number);
-  const i = installed.split(".").map(Number);
-  for (let k = 0; k < 3; k++) {
-    if ((l[k] ?? 0) > (i[k] ?? 0)) {
-      return true;
-    }
-    if ((l[k] ?? 0) < (i[k] ?? 0)) {
-      return false;
-    }
-  }
-  return false;
-}
-
-async function runUpdate(
+export async function runUpdate(
   context: vscode.ExtensionContext,
-  output: vscode.OutputChannel
-): Promise<void> {
+  output: vscode.OutputChannel,
+  mcpProvider?: McpProviderHandle
+): Promise<boolean> {
   const venvDir = path.join(context.globalStorageUri.fsPath, VENV_DIR_NAME);
   const venvPython = getVenvPython(venvDir);
+
+  // Acquire cross-window update lock
+  if (!acquireUpdateLock(venvDir)) {
+    vscode.window.showInformationMessage("CAP: An update is already in progress in another window.");
+    return false;
+  }
+
+  // Pause MCP servers so pip can replace files
+  mcpProvider?.dispose();
+  output.appendLine("MCP servers paused for update.");
+
+  // Brief delay to let other windows react to the lock file
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   output.appendLine(`Updating ${CAP_CLI_PACKAGE}...`);
   try {
     await execFileAsync(venvPython, ["-m", "pip", "install", "--upgrade", CAP_CLI_PACKAGE], {
       timeout: 60000,
     });
-    vscode.window.showInformationMessage("CAP updated. Reload the window to use the new version.", "Reload").then((choice) => {
-      if (choice === "Reload") {
-        vscode.commands.executeCommand("workbench.action.reloadWindow");
-      }
-    });
+
+    // Release lock and restart MCP servers
+    releaseUpdateLock(venvDir);
+    mcpProvider?.reregister();
+    output.appendLine("MCP servers restarted after update.");
+
+    vscode.window
+      .showInformationMessage(
+        "CAP updated successfully. Reload the window to apply.",
+        "Reload"
+      )
+      .then((choice) => {
+        if (choice === "Reload") {
+          vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }
+      });
+
+    return true;
   } catch (err: any) {
-    vscode.window.showErrorMessage(`CAP: Update failed. ${err.message}`);
+    // Release lock even on failure
+    releaseUpdateLock(venvDir);
+    mcpProvider?.reregister();
+
+    const choice = await vscode.window.showErrorMessage(
+      `CAP: Update failed. ${err.message}`,
+      "Retry"
+    );
+
+    if (choice === "Retry") {
+      return await runUpdate(context, output, mcpProvider);
+    }
+
+    return false;
   }
 }

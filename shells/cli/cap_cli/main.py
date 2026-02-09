@@ -3,7 +3,7 @@
 import click
 
 from .meta import __version__
-from .commands import serve, init, validate
+from .commands import serve, init, validate, compatibility
 
 
 @click.group()
@@ -23,6 +23,7 @@ def cli(ctx):
 cli.add_command(serve.serve)
 cli.add_command(init.init)
 cli.add_command(validate.validate)
+cli.add_command(compatibility.compatibility)
 
 
 def main():

@@ -1,5 +1,6 @@
 /**
  * Register cap serve as an MCP server for each workspace folder with .cap/.
+ * Supports dispose/re-register for cross-window update coordination.
  */
 
 import * as vscode from "vscode";
@@ -10,11 +11,16 @@ import { CAP_DIR_NAME, MCP_PROVIDER_ID } from "../constants";
 import type { Environment } from "../setup/environment";
 import type { FileSystemWatcher } from "../utils/fileSystemWatcher";
 
+export interface McpProviderHandle {
+  dispose: () => void;
+  reregister: () => void;
+}
+
 export function registerMcpProvider(
   context: vscode.ExtensionContext,
   env: Environment,
   capWatcher: FileSystemWatcher
-): vscode.Disposable {
+): McpProviderHandle {
   const onDidChange = new vscode.EventEmitter<void>();
 
   const provider: vscode.McpServerDefinitionProvider = {
@@ -36,10 +42,27 @@ export function registerMcpProvider(
     },
   };
 
-  const registration = vscode.lm.registerMcpServerDefinitionProvider(
-    MCP_PROVIDER_ID,
-    provider
-  );
+  let registration: vscode.Disposable | undefined;
+
+  function register(): void {
+    if (registration) {
+      return;
+    }
+    registration = vscode.lm.registerMcpServerDefinitionProvider(
+      MCP_PROVIDER_ID,
+      provider
+    );
+  }
+
+  function unregister(): void {
+    if (registration) {
+      registration.dispose();
+      registration = undefined;
+    }
+  }
+
+  // Initial registration
+  register();
 
   const createSub = capWatcher.onDidCreate(() => onDidChange.fire());
   const deleteSub = capWatcher.onDidDelete(() => onDidChange.fire());
@@ -48,5 +71,17 @@ export function registerMcpProvider(
     onDidChange.fire()
   );
 
-  return vscode.Disposable.from(registration, foldersWatcher, createSub, deleteSub, onDidChange);
+  return {
+    dispose: () => {
+      unregister();
+      foldersWatcher.dispose();
+      createSub.dispose();
+      deleteSub.dispose();
+      onDidChange.dispose();
+    },
+    reregister: () => {
+      register();
+      onDidChange.fire();
+    },
+  };
 }

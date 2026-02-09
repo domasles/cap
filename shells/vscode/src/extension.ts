@@ -1,8 +1,11 @@
 import * as vscode from "vscode";
+import * as path from "path";
 
-import { OUTPUT_CHANNEL_NAME } from "./constants";
+import { OUTPUT_CHANNEL_NAME, VENV_DIR_NAME } from "./constants";
 import { setupEnvironment } from "./setup/environment";
 import { checkForUpdate } from "./setup/updater";
+import { checkCompatibility } from "./setup/compatibility";
+import { watchUpdateLock, isUpdateLocked } from "./setup/updateLock";
 import { createCapDirectoryWatcher } from "./utils/fileSystemWatcher";
 import { registerMcpProvider } from "./mcp/provider";
 import { registerMcpNotice } from "./mcp/notice";
@@ -26,16 +29,46 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     return;
   }
 
+  // Check for CLI updates first (blocking) — user may need the latest CLI for compat
+  await checkForUpdate(context, env.capPath, output);
+
+  // Check CLI and extension version compatibility (runs after any update)
+  const compatible = await checkCompatibility(context, env, output);
+  if (!compatible) {
+    output.appendLine("CLI incompatible - extension inactive.");
+    return;
+  }
+
   const capWatcher = createCapDirectoryWatcher();
   context.subscriptions.push(capWatcher);
 
-  context.subscriptions.push(registerMcpProvider(context, env, capWatcher));
+  const mcpProvider = registerMcpProvider(context, env, capWatcher);
+  context.subscriptions.push({ dispose: () => mcpProvider.dispose() });
+
+  // Watch for cross-window update lock
+  const venvDir = path.join(context.globalStorageUri.fsPath, VENV_DIR_NAME);
+
+  if (isUpdateLocked(venvDir)) {
+    output.appendLine("Update in progress in another window - MCP servers paused.");
+    mcpProvider.dispose();
+  }
+
+  const lockWatcher = watchUpdateLock(venvDir);
+  lockWatcher.onLocked(() => {
+    output.appendLine("Update lock acquired by another window - pausing MCP servers.");
+    mcpProvider.dispose();
+  });
+  lockWatcher.onUnlocked(() => {
+    output.appendLine("Update lock released - restarting MCP servers.");
+    mcpProvider.reregister();
+  });
+  context.subscriptions.push({ dispose: () => lockWatcher.dispose() });
+
   registerInitCommands(context, env);
   context.subscriptions.push(registerValidation(context, env, output));
 
   promptInitForWorkspaces(env).catch(() => {});
   registerMcpNotice(context, capWatcher);
-  checkForUpdate(context, env.capPath, output).catch(() => {});
 
   output.appendLine("CAP activated.");
 }
